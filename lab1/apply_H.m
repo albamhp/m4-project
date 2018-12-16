@@ -6,10 +6,10 @@ function [image_transformed] = apply_H (image, H)
 
 % Image corners in homogeneous coordinates.
 corners = zeros(4,3);
- corners(1,:) = [1 1 1]';
- corners(2,:) = [cols 1 1]';
- corners(3,:) = [1 rows 1]';
- corners(4,:) = [cols rows 1]';
+ corners(1,:) = [1 1 1];
+ corners(2,:) = [cols 1 1];
+ corners(3,:) = [1 rows 1];
+ corners(4,:) = [cols rows 1];
       
 % Transform the image corners 
 transformed_corners = H*corners';

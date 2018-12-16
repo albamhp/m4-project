@@ -1,3 +1,7 @@
+close all;
+clear all;
+clc;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 1: Image rectification
 
@@ -19,7 +23,15 @@ I=imread('Data/0005_s.png'); % we have to be in the proper folder
 % ToDo: generate a matrix H which produces a similarity transformation
 
 %%% X THE ANGLE OF ROTATION IN THE NEW COORDINATES SYSTEM (NO IDEA...)
-H = [cos(x),-sin(x),0; sin(x),cos(x),0; 0,0,1];
+
+theta = 50;
+scale = 0.7;
+tx = 100;
+ty = 100;
+T = [1,0,tx; 0,1,ty; 0,0,1];
+R = [scale*cos(theta),-scale*sin(theta),0; scale*sin(theta),scale*cos(theta),0; 0,0,1];
+H = T*R;
+
 
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
@@ -28,24 +40,48 @@ figure; imshow(I); figure; imshow(uint8(I2));
 %% 1.2. Affinities
 
 % ToDo: generate a matrix H which produces an affine transformation
+theta = 50;
+phi = 0;
+scale1 = 0.7;
+scale2 = 0.7;
 
-I2 = apply_H(I, H);
-figure; imshow(I); figure; imshow(uint8(I2));
+
+R_theta = [cos(theta),-sin(theta),0; sin(theta),cos(theta),0; 0,0,1];
+R_phi_p = [cos(phi),-sin(phi),0; sin(phi),cos(phi),0; 0,0,1];
+R_phi_n = [cos(-phi),-sin(-phi),0; sin(-phi),cos(-phi),0; 0,0,1];
+S = [scale1,0,0; 0,scale2,0; 0,0,1];
+T = [1,0,tx; 0,1,ty; 0,0,1];
+H1 = T*R_phi_p*S*R_phi_n*R_theta;
+
+I3 = apply_H(I, H1);
+figure; imshow(I); figure; imshow(uint8(I3));
 
 % ToDo: decompose the affinity in four transformations: two
 % rotations, a scale, and a translation
 
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
+if ( isequal(H,H1))
+    disp("The matrix are equal")
+else 
+    disp("They are not the same")
+end
 
+       
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
-
+if ( isequal(I2,I3))
+    disp("The images are equal")
+else
+    disp("The images are not equal")
+end
 
 
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
+
+
 
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
