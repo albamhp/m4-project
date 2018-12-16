@@ -82,7 +82,7 @@ end
 % ToDo: generate a matrix H which produces a projective transformation
 
 H2 = H1;
-H2(3,1:2) = [0,0.0005];
+H2(3,1:2) = [0,0.0001];
 I2 = apply_H(I, H2);
 close all;
 figure; imshow(I); figure; imshow(uint8(I2));
