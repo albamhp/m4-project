@@ -214,6 +214,7 @@ disp("Angle 2 rectified:");disp(angler2);
 %       the metric rectification) with the chosen lines printed on it.
 %       Compute also the angles between the pair of lines before and after
 %       rectification.
+
 lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
 lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
 
@@ -245,4 +246,21 @@ figure; imshow(uint8(I3));
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
 
 
+lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
+lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
+
+A = [lm1(1:2); lm2(1:2)];
+b = [lm1(3); lm2(3)];
+sol = linsolve(A, b);
+
+sv = [sol' 1];
+
+S = [sv(1) sv(2); sv(2) sv(3)];
+R = chol(S);
+
+Ha = inv([R [0;0]; 0 0 1]);
+
+close all
+I3 = apply_H(I, Ha*Hp');
+figure; imshow(uint8(I3));
 
