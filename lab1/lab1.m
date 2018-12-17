@@ -39,10 +39,12 @@ figure; imshow(I); figure; imshow(uint8(I2));
 %% 1.2. Affinities
 
 % ToDo: generate a matrix H which produces an affine transformation
-theta = 50;
+theta = 0;
 phi = 0;
 scale1 = 0.7;
 scale2 = 0.7;
+shx = 0;
+shy = -1;
 
 
 R_theta = [cos(theta),-sin(theta),0; sin(theta),cos(theta),0; 0,0,1];
@@ -50,8 +52,8 @@ R_phi_p = [cos(phi),-sin(phi),0; sin(phi),cos(phi),0; 0,0,1];
 R_phi_n = [cos(-phi),-sin(-phi),0; sin(-phi),cos(-phi),0; 0,0,1];
 S = [scale1,0,0; 0,scale2,0; 0,0,1];
 T = [1,0,tx; 0,1,ty; 0,0,1];
-H1 = T*R_phi_p*S*R_phi_n*R_theta;
-
+SH = [1 shy 0; shx 1 0; 0 0 1];
+H1 = T*R_phi_p*S*R_phi_n*R_theta*SH;
 I3 = apply_H(I, H1);
 figure; imshow(I); figure; imshow(uint8(I3));
 
@@ -79,17 +81,15 @@ end
 %% 1.3 Projective transformations (homographies)
 
 % ToDo: generate a matrix H which produces a projective transformation
-
+close all
 H2 = H1;
 H2(3,1:2) = [0,0.0005];
 I2 = apply_H(I, H2);
-close all;
 figure; imshow(I); figure; imshow(uint8(I2));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 
-close all
 % choose the image points
 I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
@@ -224,21 +224,24 @@ disp("Angle 2 rectified:");disp(angler2);
 %       Show the (properly) transformed lines that use in every step.
 
 close all
+clear all
+clc
+
 % choose the image points
-I=imread('Data/0000_s.png');
-A = load('Data/0000_s_info_lines.txt');
+I=imread('Data/0001_s.png');
+A = load('Data/0001_s_info_lines.txt');
 
 % indices of lines
-i = 424;
+i = 614;
 p1 = [A(i,1) A(i,2) 1]';
 p2 = [A(i,3) A(i,4) 1]';
-i = 240;
+i = 159;
 p3 = [A(i,1) A(i,2) 1]';
 p4 = [A(i,3) A(i,4) 1]';
-i = 712;
+i = 645;
 p5 = [A(i,1) A(i,2) 1]';
 p6 = [A(i,3) A(i,4) 1]';
-i = 565;
+i = 541;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
 
