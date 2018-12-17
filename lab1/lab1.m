@@ -363,13 +363,59 @@ disp("Angle 2 rectified:");disp(angler2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
+% indices of lines
+
+% choose the image points
+I=imread('Data/0000_s.png');
+A = load('Data/0000_s_info_lines.txt');
+
+% indices of lines
+i = 424;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 240;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 712;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 565;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+i = 227;
+p9 = [A(i,1) A(i,2) 1]';
+p10 = [A(i,3) A(i,4) 1]';
+i = 367;
+p11 = [A(i,1) A(i,2) 1]';
+p12 = [A(i,3) A(i,4) 1]';
 
 
-lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
-lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
+% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
-A = [lm1(1:2); lm2(1:2)];
-b = [lm1(3); lm2(3)];
+coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
+l1 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
+l2 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
+l3 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
+l4 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+coefficients = polyfit([p9(1), p10(1)], [p9(2), p10(2)], 1);
+l5 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+coefficients = polyfit([p11(1), p12(1)], [p11(2), p12(2)], 1);
+l6 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+
+lm1 = [l1(1)*l3(1), l1(1)*l3(2) + l1(2)*l3(1), l1(2)*l3(2)];
+lm2 = [l2(1)*l4(1), l2(1)*l4(2) + l2(2)*l4(1), l2(2)*l4(2)];
+lm3 = [l1(1)*l4(1), l1(1)*l4(2) + l1(2)*l4(1), l1(2)*l4(2)];
+lm4 = [l2(1)*l3(1), l2(1)*l3(2) + l2(2)*l3(1), l2(2)*l3(2)];
+lm5 = [l5(1)*l6(1), l5(1)*l6(2) + l5(2)*l6(1), l5(2)*l6(2)];
+
+
+A = [lm1(1:2); lm2(1:2); lm3(1:2); lm4(1:2); lm5(1:2)];
+b = [lm1(3); lm2(3); lm3(3); lm4(3); lm5(3)];
+
 sol = linsolve(A, b);
 
 sv = [sol' 1];
