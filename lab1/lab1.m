@@ -83,13 +83,11 @@ end
 H2 = H1;
 H2(3,1:2) = [0,0.0005];
 I2 = apply_H(I, H2);
-close all;
 figure; imshow(I); figure; imshow(uint8(I2));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 
-close all
 % choose the image points
 I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
@@ -142,30 +140,32 @@ vp2 = [vp2(1) / vp2(3), vp2(2) / vp2(3), 1];
 coefficients = polyfit([vp1(1), vp2(1)], [vp1(2), vp2(2)], 1);
 vl = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
 
-H = [1 0 0; 0 1 0; vl];
+Hp = [1 0 0; 0 1 0; vl];
 
-I2 = apply_H(I, H);
+I2 = apply_H(I, Hp);
 figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 
-pr1 = H*p1;
+% First we transform the points
+pr1 = Hp*p1;
 pr1 = [pr1(1)/ pr1(3), pr1(2)/pr1(3), 1];
-pr2 = H*p2;
+pr2 = Hp*p2;
 pr2 = [pr2(1)/ pr2(3), pr2(2)/pr2(3), 1];
-pr3 = H*p3;
+pr3 = Hp*p3;
 pr3 = [pr3(1)/ pr3(3), pr3(2)/pr3(3), 1];
-pr4 = H*p4;
+pr4 = Hp*p4;
 pr4 = [pr4(1)/ pr4(3), pr4(2)/pr4(3), 1];
-pr5 = H*p5;
+pr5 = Hp*p5;
 pr5 = [pr5(1)/ pr5(3), pr5(2)/pr5(3), 1];
-pr6 = H*p6;
+pr6 = Hp*p6;
 pr6 = [pr6(1)/ pr6(3), pr6(2)/pr6(3), 1];
-pr7 = H*p7;
+pr7 = Hp*p7;
 pr7 = [pr7(1)/ pr7(3), pr7(2)/pr7(3), 1];
-pr8 = H*p8;
+pr8 = Hp*p8;
 pr8 = [pr8(1)/ pr8(3), pr8(2)/pr8(3), 1];
 
+% Now we compute the lines from the transformed points
 coefficients = polyfit([pr1(1), pr2(1)], [pr1(2), pr2(2)], 1);
 lr1 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
 
@@ -214,6 +214,23 @@ disp("Angle 2 rectified:");disp(angler2);
 %       the metric rectification) with the chosen lines printed on it.
 %       Compute also the angles between the pair of lines before and after
 %       rectification.
+lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
+lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
+
+A = [lm1(1:2); lm2(1:2)];
+b = [lm1(3); lm2(3)];
+sol = linsolve(A, b);
+
+sv = [sol' 1];
+
+S = [sv(1) sv(2); sv(2) sv(3)];
+R = chol(S);
+
+Ha = inv([R [0;0]; 0 0 1]);
+
+close all
+I3 = apply_H(I, Ha*Hp');
+figure; imshow(uint8(I3));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Affine and Metric Rectification of the left facade of image 0001
