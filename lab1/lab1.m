@@ -95,32 +95,18 @@ I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
 % indices of lines
-i = 424;
-p1 = [A(i,1) A(i,2) 1]';
-p2 = [A(i,3) A(i,4) 1]';
-i = 240;
-p3 = [A(i,1) A(i,2) 1]';
-p4 = [A(i,3) A(i,4) 1]';
-i = 712;
-p5 = [A(i,1) A(i,2) 1]';
-p6 = [A(i,3) A(i,4) 1]';
-i = 565;
-p7 = [A(i,1) A(i,2) 1]';
-p8 = [A(i,3) A(i,4) 1]';
+
+[p1, p2] = get_points (424, A);
+[p3, p4] = get_points (240, A);
+[p5, p6] = get_points (712, A);
+[p7, p8] = get_points (565, A);
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
-coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
-l1 = [coefficients(1) -1 coefficients(2)];
-
-coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
-l2 = [coefficients(1) -1 coefficients(2)];
-
-coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
-l3 = [coefficients(1) -1 coefficients(2)];
-
-coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
-l4 = [coefficients(1) -1 coefficients(2)];
+l1 = get_line(p1, p2);
+l2 = get_line(p3, p4);
+l3 = get_line(p5, p6);
+l4 = get_line(p7, p8);
 
 % show the chosen lines in the image
 figure;imshow(I);
@@ -130,6 +116,7 @@ plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
 plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+hold off;
 
 % ToDo: compute the homography that affinely rectifies the image
 
@@ -150,11 +137,8 @@ I2 = apply_H(I, Hp);
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 
 lr1 = inv(Hp)' * l1';
-
 lr2 = inv(Hp)' * l2';
-
 lr3 = inv(Hp)' * l3';
-
 lr4 = inv(Hp)' * l4';
 
 % show the transformed lines in the transformed image
@@ -208,9 +192,9 @@ b = -[lm1(3); lm2(3)];
 sol = linsolve(A, b);
 
 S = [sol(1) sol(2); sol(2) 1];
-R = chol(S);
+R = chol(inv(S));
 
-Ha = [inv(R) [0;0]; 0 0 1];
+Ha = [R [0;0]; 0 0 1];
 
 H3 = Ha*Hp;
 
@@ -266,32 +250,18 @@ I=imread('Data/0001_s.png');
 A = load('Data/0001_s_info_lines.txt');
 
 % indices of lines
-i = 614;
-p1 = [A(i,1) A(i,2) 1]';
-p2 = [A(i,3) A(i,4) 1]';
-i = 159;
-p3 = [A(i,1) A(i,2) 1]';
-p4 = [A(i,3) A(i,4) 1]';
-i = 645;
-p5 = [A(i,1) A(i,2) 1]';
-p6 = [A(i,3) A(i,4) 1]';
-i = 541;
-p7 = [A(i,1) A(i,2) 1]';
-p8 = [A(i,3) A(i,4) 1]';
+[p1, p2] = get_points (614, A);
+[p3, p4] = get_points (159, A);
+[p5, p6] = get_points (645, A);
+[p7, p8] = get_points (541, A);
+
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
-coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
-l1 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
-l2 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
-l3 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
-l4 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+l1 = get_line(p1, p2);
+l2 = get_line(p3, p4);
+l3 = get_line(p5, p6);
+l4 = get_line(p7, p8);
 
 % show the chosen lines in the image
 figure;imshow(I);
@@ -359,41 +329,23 @@ I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
 % indices of lines
-i = 424;
-p1 = [A(i,1) A(i,2) 1]';
-p2 = [A(i,3) A(i,4) 1]';
-i = 240;
-p3 = [A(i,1) A(i,2) 1]';
-p4 = [A(i,3) A(i,4) 1]';
-i = 712;
-p5 = [A(i,1) A(i,2) 1]';
-p6 = [A(i,3) A(i,4) 1]';
-i = 565;
-p7 = [A(i,1) A(i,2) 1]';
-p8 = [A(i,3) A(i,4) 1]';
-
-i = 227;
-p9 = [A(i,1) A(i,2) 1]';
-p10 = [A(i,3) A(i,4) 1]';
-i = 534;
-p11 = [A(i,1) A(i,2) 1]';
-p12 = [A(i,3) A(i,4) 1]';
+[p1, p2] = get_points (424, A);
+[p3, p4] = get_points (240, A);
+[p5, p6] = get_points (712, A);
+[p7, p8] = get_points (565, A);
+[p9, p10] = get_points (227, A);
+[p11, p12] = get_points (534, A);
 
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
-coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
-l1 = [coefficients(1) -1 coefficients(2)];
-coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
-l2 = [coefficients(1) -1 coefficients(2)];
-coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
-l3 = [coefficients(1) -1 coefficients(2)];
-coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
-l4 = [coefficients(1) -1 coefficients(2)];
-coefficients = polyfit([p9(1), p10(1)], [p9(2), p10(2)], 1);
-l5 = [coefficients(1) -1 coefficients(2)];
-coefficients = polyfit([p11(1), p12(1)], [p11(2), p12(2)], 1);
-l6 = [coefficients(1) -1 coefficients(2)];
+l1 = get_line(p1, p2);
+l2 = get_line(p3, p4);
+l3 = get_line(p5, p6);
+l4 = get_line(p7, p8);
+l5 = get_line(p9, p10);
+l6 = get_line(p11, p12);
+
 
 lm1 = [l1(1)*l3(1),(l1(1)*l3(2)+l1(2)*l3(1))/2, l1(2)*l3(2), (l1(1)*l3(3)+l1(3)*l3(1))/2, (l1(2)*l3(3)+l1(3)*l3(2))/2, l1(3)*l3(3)];
 lm2 = [l2(1)*l4(1),(l2(1)*l4(2)+l2(2)*l4(1))/2, l2(2)*l4(2), (l2(1)*l4(3)+l2(3)*l4(1))/2, (l2(2)*l4(3)+l2(3)*l4(2))/2, l2(3)*l4(3)];
@@ -424,4 +376,14 @@ function angle = get_angle(line1, line2)
 
     cos = dot(line1(1:2), line2(1:2)) / (norm(line1(1:2)) * norm(line2(1:2)));
     angle = rad2deg(acos(cos));
+end
+
+function [p1, p2] = get_points(i, A)
+    p1 = [A(i,1) A(i,2) 1]';
+    p2 = [A(i,3) A(i,4) 1]';
+end
+
+function l1 = get_line(p1, p2)
+    coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
+    l1 = [coefficients(1) -1 coefficients(2)];
 end
