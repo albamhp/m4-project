@@ -369,7 +369,7 @@ disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
 %% 5. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
 % indices of lines
-
+close all
 % choose the image points
 I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
@@ -399,20 +399,13 @@ lm3 = [l1(1)*l4(1),(l1(1)*l4(2)+l1(2)*l4(1))/2, l1(2)*l4(2), (l1(1)*l4(3)+l1(3)*
 lm4 = [l2(1)*l3(1),(l2(1)*l3(2)+l2(2)*l3(1))/2, l2(2)*l3(2), (l2(1)*l3(3)+l2(3)*l3(1))/2, (l2(2)*l3(3)+l2(3)*l3(2))/2, l2(3)*l3(3)];
 lm5 = [l5(1)*l6(1),(l5(1)*l6(2)+l5(2)*l6(1))/2, l5(2)*l6(2), (l5(1)*l6(3)+l5(3)*l6(1))/2, (l5(2)*l6(3)+l5(3)*l6(2))/2, l5(3)*l6(3)];
 
+A = [lm1; lm2; lm3; lm4; lm5];
 
-A = [lm1(1:5); lm2(1:5); lm3(1:5); lm4(1:5); lm5(1:5)];
-b = -[lm1(6); lm2(6); lm3(6); lm4(6); lm5(6)];
+[U, D, V] = svd(A);
 
-sol = linsolve(A, b);
+C = V(:, 6);
+H = [C(1), C(2)/2, C(4)/2; C(2)/2, C(3), C(5)/2; C(4)/2, C(5)/2, C(6)];
 
-S = [sol(1) sol(2)/2; sol(2)/2 sol(3)];
-Sv = [sol(4)/2 sol(5)/2]';
-v = inv(S)*Sv;
-K = chol(S);
-
-H = [K, [0; 0]; v' 1];
-
-close all
 I5 = apply_H(I, H);
 figure; imshow(uint8(I5));
 
