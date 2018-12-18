@@ -207,9 +207,7 @@ A = [lm1(1:2); lm2(1:2)];
 b = -[lm1(3); lm2(3)];
 sol = linsolve(A, b);
 
-sv = [sol' 1];
-
-S = [sv(1) sv(2); sv(2) sv(3)];
+S = [sol(1) sol(2); sol(2) 1];
 R = chol(S);
 
 Ha = [inv(R) [0;0]; 0 0 1];
@@ -400,66 +398,75 @@ disp("Angle 2 rectified:");disp(angler2);
 % indices of lines
 
 % choose the image points
-% I=imread('Data/0000_s.png');
-% A = load('Data/0000_s_info_lines.txt');
-% 
-% % indices of lines
-% i = 424;
-% p1 = [A(i,1) A(i,2) 1]';
-% p2 = [A(i,3) A(i,4) 1]';
-% i = 240;
-% p3 = [A(i,1) A(i,2) 1]';
-% p4 = [A(i,3) A(i,4) 1]';
-% i = 712;
-% p5 = [A(i,1) A(i,2) 1]';
-% p6 = [A(i,3) A(i,4) 1]';
-% i = 565;
-% p7 = [A(i,1) A(i,2) 1]';
-% p8 = [A(i,3) A(i,4) 1]';
-% 
-% i = 227;
-% p9 = [A(i,1) A(i,2) 1]';
-% p10 = [A(i,3) A(i,4) 1]';
-% i = 367;
-% p11 = [A(i,1) A(i,2) 1]';
-% p12 = [A(i,3) A(i,4) 1]';
-% 
-% 
-% % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
-% 
-% coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
-% l1 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
-% l2 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
-% l3 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
-% l4 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% coefficients = polyfit([p9(1), p10(1)], [p9(2), p10(2)], 1);
-% l5 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% coefficients = polyfit([p11(1), p12(1)], [p11(2), p12(2)], 1);
-% l6 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-% 
-% lm1 = [l1(1)*l3(1),(l1(1)*l3(2)+l1(2)*l3(1))/2, l1(2)*l3(2), (l1(1)*l3(3)+l1(3)*l3(1))/2, (l1(2)*l3(3)+l1(3)*l3(2))/2, l1(3)*l3(3)];
-% lm2 = [l2(1)*l4(1),(l2(1)*l4(2)+l2(2)*l4(1))/2, l2(2)*l4(2), (l2(1)*l4(3)+l2(3)*l4(1))/2, (l2(2)*l4(3)+l2(3)*l4(2))/2, l2(3)*l4(3)];
-% lm3 = [l1(1)*l4(1),(l1(1)*l4(2)+l1(2)*l4(1))/2, l1(2)*l4(2), (l1(1)*l4(3)+l1(3)*l4(1))/2, (l1(2)*l4(3)+l1(3)*l4(2))/2, l1(3)*l4(3)];
-% lm4 = [l2(1)*l3(1),(l2(1)*l3(2)+l2(2)*l3(1))/2, l2(2)*l3(2), (l2(1)*l3(3)+l2(3)*l3(1))/2, (l2(2)*l3(3)+l2(3)*l3(2))/2, l2(3)*l3(3)];
-% lm5 = [l5(1)*l6(1),(l5(1)*l6(2)+l5(2)*l6(1))/2, l5(2)*l6(2), (l5(1)*l6(3)+l5(3)*l6(1))/2, (l5(2)*l6(3)+l5(3)*l6(2))/2, l5(3)*l6(3)];
-% 
-% 
-% A = [lm1(1:2); lm2(1:2); lm3(1:2); lm4(1:2); lm5(1:2)];
-% b = [lm1(3); lm2(3); lm3(3); lm4(3); lm5(3)];
-% 
-% sol = linsolve(A, b);
-% 
-% sv = [sol' 1];
-% 
-% S = [sv(1) sv(2); sv(2) sv(3)];
-% K = chol(S);
-% 
-% H = inv([K*K' K*K'; K*K' K*K']);
-% 
-% close all
-% I5 = apply_H(I, H);
-% figure; imshow(uint8(I5));
+I=imread('Data/0000_s.png');
+A = load('Data/0000_s_info_lines.txt');
 
+% indices of lines
+i = 424;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+i = 240;
+p3 = [A(i,1) A(i,2) 1]';
+p4 = [A(i,3) A(i,4) 1]';
+i = 712;
+p5 = [A(i,1) A(i,2) 1]';
+p6 = [A(i,3) A(i,4) 1]';
+i = 565;
+p7 = [A(i,1) A(i,2) 1]';
+p8 = [A(i,3) A(i,4) 1]';
+
+i = 227;
+p9 = [A(i,1) A(i,2) 1]';
+p10 = [A(i,3) A(i,4) 1]';
+i = 534;
+p11 = [A(i,1) A(i,2) 1]';
+p12 = [A(i,3) A(i,4) 1]';
+
+
+% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
+
+coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
+l1 = [coefficients(1) -1 coefficients(2)];
+coefficients = polyfit([p3(1), p4(1)], [p3(2), p4(2)], 1);
+l2 = [coefficients(1) -1 coefficients(2)];
+coefficients = polyfit([p5(1), p6(1)], [p5(2), p6(2)], 1);
+l3 = [coefficients(1) -1 coefficients(2)];
+coefficients = polyfit([p7(1), p8(1)], [p7(2), p8(2)], 1);
+l4 = [coefficients(1) -1 coefficients(2)];
+coefficients = polyfit([p9(1), p10(1)], [p9(2), p10(2)], 1);
+l5 = [coefficients(1) -1 coefficients(2)];
+coefficients = polyfit([p11(1), p12(1)], [p11(2), p12(2)], 1);
+l6 = [coefficients(1) -1 coefficients(2)];
+
+lm1 = [l1(1)*l3(1),(l1(1)*l3(2)+l1(2)*l3(1))/2, l1(2)*l3(2), (l1(1)*l3(3)+l1(3)*l3(1))/2, (l1(2)*l3(3)+l1(3)*l3(2))/2, l1(3)*l3(3)];
+lm2 = [l2(1)*l4(1),(l2(1)*l4(2)+l2(2)*l4(1))/2, l2(2)*l4(2), (l2(1)*l4(3)+l2(3)*l4(1))/2, (l2(2)*l4(3)+l2(3)*l4(2))/2, l2(3)*l4(3)];
+lm3 = [l1(1)*l4(1),(l1(1)*l4(2)+l1(2)*l4(1))/2, l1(2)*l4(2), (l1(1)*l4(3)+l1(3)*l4(1))/2, (l1(2)*l4(3)+l1(3)*l4(2))/2, l1(3)*l4(3)];
+lm4 = [l2(1)*l3(1),(l2(1)*l3(2)+l2(2)*l3(1))/2, l2(2)*l3(2), (l2(1)*l3(3)+l2(3)*l3(1))/2, (l2(2)*l3(3)+l2(3)*l3(2))/2, l2(3)*l3(3)];
+lm5 = [l5(1)*l6(1),(l5(1)*l6(2)+l5(2)*l6(1))/2, l5(2)*l6(2), (l5(1)*l6(3)+l5(3)*l6(1))/2, (l5(2)*l6(3)+l5(3)*l6(2))/2, l5(3)*l6(3)];
+
+
+A = [lm1(1:5); lm2(1:5); lm3(1:5); lm4(1:5); lm5(1:5)];
+b = -[lm1(6); lm2(6); lm3(6); lm4(6); lm5(6)];
+
+sol = linsolve(A, b);
+
+S = [sol(1) sol(2)/2; sol(2)/2 sol(3)];
+Sv = [sol(4)/2 sol(5)/2]';
+v = inv(S)*Sv;
+K = chol(S);
+
+H = [K, [0; 0]; v' 1];
+
+close all
+I5 = apply_H(I, H);
+figure; imshow(uint8(I5));
+
+
+
+function angle =  get_angle(line1, line2)
+    line1 = [line1(1)/line1(3), line1(2)/line1(3), 1];
+    line2 = [line2(1)/line2(3), line2(2)/line2(3), 1];
+
+    cos = dot(line1(1:2), line2(1:2)) / (norm(line1(1:2)) * norm(line2(1:2)));
+    angle = rad2deg(acos(cos));
+end
