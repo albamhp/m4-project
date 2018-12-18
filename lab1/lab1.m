@@ -153,19 +153,14 @@ hold off;
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
-cos1 = dot(l1(1:2), l2(1:2)) / (norm(l1(1:2)) * norm(l2(1:2)));
-cosr1 = dot(lr1(1:2), lr2(1:2)) / (norm(lr1(1:2)) * norm(lr2(1:2)));
-angle1 = acos(cos1);
-disp("Angle 1:");disp(angle1);
-angler1 = acos(cosr1);
-disp("Angle 1 rectified:");disp(angler1);
 
-cos2 = dot(l3(1:2), l4(1:2)) / (norm(l3(1:2)) * norm(l4(1:2)));
-angle2 = acos(cos2);
-disp("Angle 2:");disp(angle2);
-cosr2 = dot(lr3(1:2), lr4(1:2)) / (norm(lr3(1:2)) * norm(lr4(1:2)));
-angler2 = acos(cosr2);
-disp("Angle 2 rectified:");disp(angler2);
+disp("Angles after affine rectification:")
+
+disp("Angle 1:");disp(get_angle(l1, l2));
+disp("Angle 1 rectified:");disp(get_angle(lr1, lr2));
+
+disp("Angle 2:");disp(get_angle(l3, l4));
+disp("Angle 2 rectified:");disp(get_angle(lr3, lr4));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,12 +195,6 @@ H3 = Ha*Hp;
 
 I3 = apply_H(I, H3);
 
-%tform = projective2d(H3');
-%I3 = imwarp(I, tform);
-
-figure; imshow(uint8(I3));
-hold on;
-
 % Now we compute the lines from the transformed points
 lr1 = inv(H3)' * l1';
 lr2 = inv(H3)' * l2';
@@ -217,11 +206,16 @@ lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
 lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
 lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
 
+figure; imshow(uint8(I3));
+hold on;
 t=1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
 plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
 plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+hold off;
+
+disp("Angles after metric rectification:")
 
 disp("Angle parallel 1:");disp(get_angle(l1, l2));
 disp("Angle parallel 1 rectified:");disp(get_angle(lr1, lr2));
@@ -238,7 +232,7 @@ disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Affine and Metric Rectification of the left facade of image 0001
-
+close all
 % ToDo: Write the code that rectifies the left facade of image 0001 with
 %       the stratified method (affine + metric). 
 %       Crop the initial image so that only the left facade is visible.
@@ -273,7 +267,7 @@ plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
 hold off;
 
-% ToDo: compute the homography that affinely rectifies the image
+% Affine rectification
 
 vp1 = cross(l1, l2);
 vp1 = [vp1(1) / vp1(3), vp1(2) / vp1(3), 1];
@@ -284,17 +278,14 @@ vp2 = [vp2(1) / vp2(3), vp2(2) / vp2(3), 1];
 coefficients = polyfit([vp1(1), vp2(1)], [vp1(2), vp2(2)], 1);
 vl = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
 
-H = [1 0 0; 0 1 0; vl];
+Hp = [1 0 0; 0 1 0; vl];
 
-I2 = apply_H(I, H);
-figure; imshow(uint8(I2));
+I2 = apply_H(I, Hp);
 
-% ToDo: compute the transformed lines lr1, lr2, lr3, lr4
-
-lr1 = inv(H3)' * l1';
-lr2 = inv(H3)' * l2';
-lr3 = inv(H3)' * l3';
-lr4 = inv(H3)' * l4';
+lr1 = inv(Hp)' * l1';
+lr2 = inv(Hp)' * l2';
+lr3 = inv(Hp)' * l3';
+lr4 = inv(Hp)' * l4';
 
 lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
 lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
@@ -311,13 +302,68 @@ plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 hold off;
 
-% ToDo: to evaluate the results, compute the angle between the different pair 
-% of lines before and after the image transformation
-disp("Angle 1:");disp(get_angle(l1, l2));
-disp("Angle 1 rectified:");disp(get_angle(lr1, lr2));
+% Metric rectification
 
-disp("Angle 2:");disp(get_angle(l3, l4));
-disp("Angle 2 rectified:");disp(get_angle(lr3, lr4));
+lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
+lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
+lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
+lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
+
+lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
+lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
+
+A = [lm1(1:2); lm2(1:2)];
+b = -[lm1(3); lm2(3)];
+sol = linsolve(A, b);
+
+S = [sol(1) sol(2); sol(2) 1];
+R = chol(inv(S));
+
+Ha = [R [0;0]; 0 0 1];
+
+H3 = Ha*Hp;
+
+I3 = apply_H(I, H3);
+
+% tform = projective2d(H3');
+% I3 = imwarp(I, imref2d(size(I)), tform);
+
+
+% Now we compute the lines from the transformed points
+lr1 = inv(H3)' * l1';
+lr2 = inv(H3)' * l2';
+lr3 = inv(H3)' * l3';
+lr4 = inv(H3)' * l4';
+
+lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
+lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
+lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
+lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
+
+figure; imshow(uint8(I3));
+hold on;
+t=1:0.1:1000;
+plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+hold off;
+
+disp("Angles after metric rectification:")
+
+disp("Angle parallel 1:");disp(get_angle(l1, l2));
+disp("Angle parallel 1 rectified:");disp(get_angle(lr1, lr2));
+
+disp("Angle paralle l2:");disp(get_angle(l3, l4));
+disp("Angle parallel 2 rectified:");disp(get_angle(lr3, lr4));
+
+disp("Angle ortho 1:");disp(get_angle(l1, l2));
+disp("Angle ortho 1 rectified:");disp(get_angle(lr1, lr3));
+
+disp("Angle ortho 2:");disp(get_angle(l2, l4));
+disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
