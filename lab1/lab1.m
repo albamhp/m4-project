@@ -8,12 +8,12 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Applying image transformations
 
-% ToDo: create the function  "apply_H" that gets as input a homography and
+% ToDo: create the function  'apply_H' that gets as input a homography and
 % an image and returns the image transformed by the homography.
 % The size of the transformed image has to be automatically set so as to 
 % contain the whole transformed image.
 % At some point you will need to interpolate the image values at some points,
-% you may use the Matlab function "interp2" for that.
+% you may use the Matlab function 'interp2' for that.
 
 
 %% 1.1. Similarities
@@ -63,18 +63,18 @@ figure; imshow(I); figure; imshow(uint8(I3));
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
 if ( isequal(H,H1))
-    disp("The matrix are equal")
+    disp('The matrix are equal')
 else 
-    disp("They are not the same")
+    disp('They are not the same')
 end
 
        
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
 if ( isequal(I2,I3))
-    disp("The images are equal")
+    disp('The images are equal')
 else
-    disp("The images are not equal")
+    disp('The images are not equal')
 end
 
 
@@ -96,8 +96,8 @@ A = load('Data/0000_s_info_lines.txt');
 
 % indices of lines
 
-[p1, p2] = get_points (424, A);
-[p3, p4] = get_points (240, A);
+[p1, p2] = get_points (227, A);
+[p3, p4] = get_points (367, A);
 [p5, p6] = get_points (712, A);
 [p7, p8] = get_points (565, A);
 
@@ -154,13 +154,13 @@ hold off;
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
 
-disp("Angles after affine rectification:")
+disp('Angles after affine rectification:')
 
-disp("Angle 1:");disp(get_angle(l1, l2));
-disp("Angle 1 rectified:");disp(get_angle(lr1, lr2));
+disp('Angle 1:');disp(get_angle(l1, l2));
+disp('Angle 1 rectified:');disp(get_angle(lr1, lr2));
 
-disp("Angle 2:");disp(get_angle(l3, l4));
-disp("Angle 2 rectified:");disp(get_angle(lr3, lr4));
+disp('Angle 2:');disp(get_angle(l3, l4));
+disp('Angle 2 rectified:');disp(get_angle(lr3, lr4));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -215,19 +215,19 @@ plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 hold off;
 
-disp("Angles after metric rectification:")
+disp('Angles after metric rectification:')
 
-disp("Angle parallel 1:");disp(get_angle(l1, l2));
-disp("Angle parallel 1 rectified:");disp(get_angle(lr1, lr2));
+disp('Angle parallel 1:');disp(get_angle(l1, l2));
+disp('Angle parallel 1 rectified:');disp(get_angle(lr1, lr2));
 
-disp("Angle paralle l2:");disp(get_angle(l3, l4));
-disp("Angle parallel 2 rectified:");disp(get_angle(lr3, lr4));
+disp('Angle paralle l2:');disp(get_angle(l3, l4));
+disp('Angle parallel 2 rectified:');disp(get_angle(lr3, lr4));
 
-disp("Angle ortho 1:");disp(get_angle(l1, l2));
-disp("Angle ortho 1 rectified:");disp(get_angle(lr1, lr3));
+disp('Angle ortho 1:');disp(get_angle(l1, l2));
+disp('Angle ortho 1 rectified:');disp(get_angle(lr1, lr3));
 
-disp("Angle ortho l2:");disp(get_angle(l2, l4));
-disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
+disp('Angle ortho l2:');disp(get_angle(l2, l4));
+disp('Angle ortho 2 rectified:');disp(get_angle(lr2, lr4));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -349,19 +349,19 @@ plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 hold off;
 
-disp("Angles after metric rectification:")
+disp('Angles after metric rectification:')
 
-disp("Angle parallel 1:");disp(get_angle(l1, l2));
-disp("Angle parallel 1 rectified:");disp(get_angle(lr1, lr2));
+disp('Angle parallel 1:');disp(get_angle(l1, l2));
+disp('Angle parallel 1 rectified:');disp(get_angle(lr1, lr2));
 
-disp("Angle paralle l2:");disp(get_angle(l3, l4));
-disp("Angle parallel 2 rectified:");disp(get_angle(lr3, lr4));
+disp('Angle paralle l2:');disp(get_angle(l3, l4));
+disp('Angle parallel 2 rectified:');disp(get_angle(lr3, lr4));
 
-disp("Angle ortho 1:");disp(get_angle(l1, l2));
-disp("Angle ortho 1 rectified:");disp(get_angle(lr1, lr3));
+disp('Angle ortho 1:');disp(get_angle(l1, l2));
+disp('Angle ortho 1 rectified:');disp(get_angle(lr1, lr3));
 
-disp("Angle ortho 2:");disp(get_angle(l2, l4));
-disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
+disp('Angle ortho 2:');disp(get_angle(l2, l4));
+disp('Angle ortho 2 rectified:');disp(get_angle(lr2, lr4));
 
 
 
@@ -409,20 +409,20 @@ H = [C(1), C(2)/2, C(4)/2; C(2)/2, C(3), C(5)/2; C(4)/2, C(5)/2, C(6)];
 I5 = apply_H(I, H);
 figure; imshow(uint8(I5));
 
-function angle = get_angle(line1, line2)
-    line1 = [line1(1)/line1(3), line1(2)/line1(3), 1];
-    line2 = [line2(1)/line2(3), line2(2)/line2(3), 1];
+% function angle = get_angle(line1, line2)
+%     line1 = [line1(1)/line1(3), line1(2)/line1(3), 1];
+%     line2 = [line2(1)/line2(3), line2(2)/line2(3), 1];
+% 
+%     cos = dot(line1(1:2), line2(1:2)) / (norm(line1(1:2)) * norm(line2(1:2)));
+%     angle = rad2deg(acos(cos));
+% end
 
-    cos = dot(line1(1:2), line2(1:2)) / (norm(line1(1:2)) * norm(line2(1:2)));
-    angle = rad2deg(acos(cos));
-end
+% function [p1, p2] = get_points(i, A)
+%     p1 = [A(i,1) A(i,2) 1]';
+%     p2 = [A(i,3) A(i,4) 1]';
+% end
 
-function [p1, p2] = get_points(i, A)
-    p1 = [A(i,1) A(i,2) 1]';
-    p2 = [A(i,3) A(i,4) 1]';
-end
-
-function l1 = get_line(p1, p2)
-    coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
-    l1 = [coefficients(1) -1 coefficients(2)];
-end
+% function l1 = get_line(p1, p2)
+%     coefficients = polyfit([p1(1), p2(1)], [p1(2), p2(2)], 1);
+%     l1 = [coefficients(1) -1 coefficients(2)];
+% end
