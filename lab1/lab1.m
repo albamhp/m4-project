@@ -212,7 +212,7 @@ R = chol(S);
 
 Ha = [inv(R) [0;0]; 0 0 1];
 
-H3 = Ha;
+H3 = Ha*Hp;
 
 I3 = apply_H(I, H3);
 
@@ -239,33 +239,17 @@ plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
 plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 
-cos1 = dot(l1(1:2), l2(1:2)) / (norm(l1(1:2)) * norm(l2(1:2)));
-cosr1 = dot(lr1(1:2), lr2(1:2)) / (norm(lr1(1:2)) * norm(lr2(1:2)));
-angle1 = acos(cos1);
-disp("Angle parallel 1:");disp(rad2deg(angle1));
-angler1 = acos(cosr1);
-disp("Angle parallel 1 rectified:");disp(rad2deg(angler1));
+disp("Angle parallel 1:");disp(get_angle(l1, l2));
+disp("Angle parallel 1 rectified:");disp(get_angle(lr1, lr2));
 
-cos2 = dot(l3(1:2), l4(1:2)) / (norm(l3(1:2)) * norm(l4(1:2)));
-angle2 = acos(cos2);
-disp("Angle paralle l2:");disp(rad2deg(angle2));
-cosr2 = dot(lr3(1:2), lr4(1:2)) / (norm(lr3(1:2)) * norm(lr4(1:2)));
-angler2 = acos(cosr2);
-disp("Angle parallel 2 rectified:");disp(rad2deg(angler2));
+disp("Angle paralle l2:");disp(get_angle(l3, l4));
+disp("Angle parallel 2 rectified:");disp(get_angle(lr3, lr4));
 
-cos1 = dot(l1(1:2), l3(1:2)) / (norm(l1(1:2)) * norm(l3(1:2)));
-cosr1 = dot(lr1(1:2), lr3(1:2)) / (norm(lr1(1:2)) * norm(lr3(1:2)));
-angle1 = acos(cos1);
-disp("Angle ortho 1:");disp(rad2deg(angle1));
-angler1 = acos(cosr1);
-disp("Angle ortho 1 rectified:");disp(rad2deg(angler1));
+disp("Angle ortho 1:");disp(get_angle(l1, l2));
+disp("Angle ortho 1 rectified:");disp(get_angle(lr1, lr3));
 
-cos2 = dot(l2(1:2), l4(1:2)) / (norm(l2(1:2)) * norm(l4(1:2)));
-angle2 = acos(cos2);
-disp("Angle ortho l2:");disp(rad2deg(angle2));
-cosr2 = dot(lr2(1:2), lr4(1:2)) / (norm(lr2(1:2)) * norm(lr4(1:2)));
-angler2 = acos(cosr2);
-disp("Angle ortho 2 rectified:");disp(rad2deg(angler2));
+disp("Angle ortho l2:");disp(get_angle(l2, l4));
+disp("Angle ortho 2 rectified:");disp(get_angle(lr2, lr4));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -337,34 +321,15 @@ figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 
-pr1 = H'*p1;
-pr1 = [pr1(1)/ pr1(3), pr1(2)/pr1(3), 1];
-pr2 = H'*p2;
-pr2 = [pr2(1)/ pr2(3), pr2(2)/pr2(3), 1];
-pr3 = H'*p3;
-pr3 = [pr3(1)/ pr3(3), pr3(2)/pr3(3), 1];
-pr4 = H'*p4;
-pr4 = [pr4(1)/ pr4(3), pr4(2)/pr4(3), 1];
-pr5 = H'*p5;
-pr5 = [pr5(1)/ pr5(3), pr5(2)/pr5(3), 1];
-pr6 = H'*p6;
-pr6 = [pr6(1)/ pr6(3), pr6(2)/pr6(3), 1];
-pr7 = H'*p7;
-pr7 = [pr7(1)/ pr7(3), pr7(2)/pr7(3), 1];
-pr8 = H'*p8;
-pr8 = [pr8(1)/ pr8(3), pr8(2)/pr8(3), 1];
+lr1 = inv(H3)' * l1';
+lr2 = inv(H3)' * l2';
+lr3 = inv(H3)' * l3';
+lr4 = inv(H3)' * l4';
 
-coefficients = polyfit([pr1(1), pr2(1)], [pr1(2), pr2(2)], 1);
-lr1 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([pr3(1), pr4(1)], [pr3(2), pr4(2)], 1);
-lr2 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([pr5(1), pr6(1)], [pr5(2), pr6(2)], 1);
-lr3 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
-
-coefficients = polyfit([pr7(1), pr8(1)], [pr7(2), pr8(2)], 1);
-lr4 = [coefficients(1)/coefficients(2) -1/coefficients(2) 1];
+lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
+lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
+lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
+lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
 
 % show the transformed lines in the transformed image
 figure;imshow(uint8(I2));
@@ -378,19 +343,11 @@ hold off;
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
-cos1 = dot(l1(1:2), l2(1:2)) / (norm(l1(1:2)) * norm(l2(1:2)));
-cosr1 = dot(lr1(1:2), lr2(1:2)) / (norm(lr1(1:2)) * norm(lr2(1:2)));
-angle1 = acos(cos1);
-disp("Angle 1:");disp(angle1);
-angler1 = acos(cosr1);
-disp("Angle 1 rectified:");disp(angler1);
+disp("Angle 1:");disp(get_angle(l1, l2));
+disp("Angle 1 rectified:");disp(get_angle(lr1, lr2));
 
-cos2 = dot(l3(1:2), l4(1:2)) / (norm(l3(1:2)) * norm(l4(1:2)));
-angle2 = acos(cos2);
-disp("Angle 2:");disp(angle2);
-cosr2 = dot(lr3(1:2), lr4(1:2)) / (norm(lr3(1:2)) * norm(lr4(1:2)));
-angler2 = acos(cosr2);
-disp("Angle 2 rectified:");disp(angler2);
+disp("Angle 2:");disp(get_angle(l3, l4));
+disp("Angle 2 rectified:");disp(get_angle(lr3, lr4));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
@@ -461,9 +418,7 @@ close all
 I5 = apply_H(I, H);
 figure; imshow(uint8(I5));
 
-
-
-function angle =  get_angle(line1, line2)
+function angle = get_angle(line1, line2)
     line1 = [line1(1)/line1(3), line1(2)/line1(3), 1];
     line2 = [line2(1)/line2(3), line2(2)/line2(3), 1];
 
