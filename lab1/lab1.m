@@ -96,8 +96,8 @@ A = load('Data/0000_s_info_lines.txt');
 
 % indices of lines
 
-[p1, p2] = get_points (227, A);
-[p3, p4] = get_points (367, A);
+[p1, p2] = get_points (424, A);
+[p3, p4] = get_points (240, A);
 [p5, p6] = get_points (712, A);
 [p7, p8] = get_points (565, A);
 
