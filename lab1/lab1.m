@@ -108,6 +108,9 @@ l2 = get_line(p3, p4);
 l3 = get_line(p5, p6);
 l4 = get_line(p7, p8);
 
+l5 = get_line(p1, p4);
+l6 = get_line(p2, p3);
+
 % show the chosen lines in the image
 figure;imshow(I);
 hold on;
@@ -140,6 +143,8 @@ lr1 = inv(Hp)' * l1';
 lr2 = inv(Hp)' * l2';
 lr3 = inv(Hp)' * l3';
 lr4 = inv(Hp)' * l4';
+lr5 = inv(Hp)' * l5';
+lr6 = inv(Hp)' * l6';
 
 % show the transformed lines in the transformed image
 figure;imshow(uint8(I2));
@@ -149,6 +154,8 @@ plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
 plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
 plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+plot(t, -(lr5(1)*t + lr5(3)) / lr5(2), 'y');
+plot(t, -(lr6(1)*t + lr6(3)) / lr6(2), 'y');
 hold off;
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
@@ -165,7 +172,7 @@ disp('Angle 2 rectified:');disp(get_angle(lr3, lr4));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric Rectification
-
+close all
 %% 3.1 Metric rectification after the affine rectification (stratified solution)
 
 % ToDo: Metric rectification (after the affine rectification) using two non-parallel orthogonal line pairs
@@ -178,8 +185,11 @@ lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
 lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
 lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
 lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
+lr5 = [lr5(1) / lr5(3), lr5(2)/lr5(3), 1];
+lr6 = [lr6(1) / lr6(3), lr6(2)/lr6(3), 1];
 
-lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
+% lm1 = [lr1(1)*lr3(1), lr1(1)*lr3(2) + lr1(2)*lr3(1), lr1(2)*lr3(2)];
+lm1 = [lr5(1)*lr6(1), lr5(1)*lr6(2) + lr5(2)*lr6(1), lr5(2)*lr6(2)];
 lm2 = [lr2(1)*lr4(1), lr2(1)*lr4(2) + lr2(2)*lr4(1), lr2(2)*lr4(2)];
 
 A = [lm1(1:2); lm2(1:2)];
@@ -200,11 +210,15 @@ lr1 = inv(H3)' * l1';
 lr2 = inv(H3)' * l2';
 lr3 = inv(H3)' * l3';
 lr4 = inv(H3)' * l4';
+lr5 = inv(H3)' * l5';
+lr6 = inv(H3)' * l6';
 
 lr1 = [lr1(1) / lr1(3), lr1(2)/lr1(3), 1];
 lr2 = [lr2(1) / lr2(3), lr2(2)/lr2(3), 1];
 lr3 = [lr3(1) / lr3(3), lr3(2)/lr3(3), 1];
 lr4 = [lr4(1) / lr4(3), lr4(2)/lr4(3), 1];
+lr5 = [lr5(1) / lr5(3), lr5(2)/lr5(3), 1];
+lr6 = [lr6(1) / lr6(3), lr6(2)/lr6(3), 1];
 
 figure; imshow(uint8(I3));
 hold on;
@@ -213,6 +227,8 @@ plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
 plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
 plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+plot(t, -(lr5(1)*t + lr5(3)) / lr5(2), 'y');
+plot(t, -(lr6(1)*t + lr6(3)) / lr6(2), 'y');
 hold off;
 
 disp('Angles after metric rectification:')
@@ -365,49 +381,51 @@ disp('Angle ortho 2 rectified:');disp(get_angle(lr2, lr4));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
-% % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
-% % indices of lines
-% close all
-% % choose the image points
-% I=imread('Data/0000_s.png');
-% A = load('Data/0000_s_info_lines.txt');
-% 
-% % indices of lines
-% [p1, p2] = get_points (424, A);
-% [p3, p4] = get_points (240, A);
-% [p5, p6] = get_points (712, A);
-% [p7, p8] = get_points (565, A);
-% [p9, p10] = get_points (227, A);
-% [p11, p12] = get_points (534, A);
-% 
-% 
-% % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
-% 
-% l1 = get_line(p1, p2);
-% l2 = get_line(p3, p4);
-% l3 = get_line(p5, p6);
-% l4 = get_line(p7, p8);
-% l5 = get_line(p9, p10);
-% l6 = get_line(p11, p12);
-% 
-% 
-% lm1 = [l1(1)*l3(1),(l1(1)*l3(2)+l1(2)*l3(1))/2, l1(2)*l3(2), (l1(1)*l3(3)+l1(3)*l3(1))/2, (l1(2)*l3(3)+l1(3)*l3(2))/2, l1(3)*l3(3)];
-% lm2 = [l2(1)*l4(1),(l2(1)*l4(2)+l2(2)*l4(1))/2, l2(2)*l4(2), (l2(1)*l4(3)+l2(3)*l4(1))/2, (l2(2)*l4(3)+l2(3)*l4(2))/2, l2(3)*l4(3)];
-% lm3 = [l1(1)*l4(1),(l1(1)*l4(2)+l1(2)*l4(1))/2, l1(2)*l4(2), (l1(1)*l4(3)+l1(3)*l4(1))/2, (l1(2)*l4(3)+l1(3)*l4(2))/2, l1(3)*l4(3)];
-% lm4 = [l2(1)*l3(1),(l2(1)*l3(2)+l2(2)*l3(1))/2, l2(2)*l3(2), (l2(1)*l3(3)+l2(3)*l3(1))/2, (l2(2)*l3(3)+l2(3)*l3(2))/2, l2(3)*l3(3)];
-% lm5 = [l5(1)*l6(1),(l5(1)*l6(2)+l5(2)*l6(1))/2, l5(2)*l6(2), (l5(1)*l6(3)+l5(3)*l6(1))/2, (l5(2)*l6(3)+l5(3)*l6(2))/2, l5(3)*l6(3)];
-% 
-% A = [lm1; lm2; lm3; lm4; lm5];
-% 
-% [U, D, V] = svd(A);
-% 
-% C = V(:, 6);
-% C = [C(1), C(2)/2, C(4)/2; C(2)/2, C(3), C(5)/2; C(4)/2, C(5)/2, C(6)];
-% 
-% K = chol(inv(C(1:2, 1:2)));
-% v = inv(C(1:2, 1:2)) * C(1:2, 3);
-% 
-% H = [K, [0; 0]; v', 1];
-% 
-% I5 = apply_H(I, H);
-% figure; imshow(uint8(I5));
+% Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
+% indices of lines
+close all
+% choose the image points
+I=imread('Data/0000_s.png');
+A = load('Data/0000_s_info_lines.txt');
+
+% indices of lines
+[p1, p2] = get_points (424, A);
+[p3, p4] = get_points (240, A);
+[p5, p6] = get_points (712, A);
+[p7, p8] = get_points (565, A);
+[p9, p10] = get_points (227, A);
+[p11, p12] = get_points (534, A);
+
+
+% ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
+
+l1 = get_line(p1, p2);
+l2 = get_line(p3, p4);
+l3 = get_line(p5, p6);
+l4 = get_line(p7, p8);
+l5 = get_line(p9, p10);
+l6 = get_line(p11, p12);
+
+
+lm1 = [l1(1)*l3(1),(l1(1)*l3(2)+l1(2)*l3(1))/2, l1(2)*l3(2), (l1(1)*l3(3)+l1(3)*l3(1))/2, (l1(2)*l3(3)+l1(3)*l3(2))/2, l1(3)*l3(3)];
+lm2 = [l2(1)*l4(1),(l2(1)*l4(2)+l2(2)*l4(1))/2, l2(2)*l4(2), (l2(1)*l4(3)+l2(3)*l4(1))/2, (l2(2)*l4(3)+l2(3)*l4(2))/2, l2(3)*l4(3)];
+lm3 = [l1(1)*l4(1),(l1(1)*l4(2)+l1(2)*l4(1))/2, l1(2)*l4(2), (l1(1)*l4(3)+l1(3)*l4(1))/2, (l1(2)*l4(3)+l1(3)*l4(2))/2, l1(3)*l4(3)];
+lm4 = [l2(1)*l3(1),(l2(1)*l3(2)+l2(2)*l3(1))/2, l2(2)*l3(2), (l2(1)*l3(3)+l2(3)*l3(1))/2, (l2(2)*l3(3)+l2(3)*l3(2))/2, l2(3)*l3(3)];
+lm5 = [l5(1)*l6(1),(l5(1)*l6(2)+l5(2)*l6(1))/2, l5(2)*l6(2), (l5(1)*l6(3)+l5(3)*l6(1))/2, (l5(2)*l6(3)+l5(3)*l6(2))/2, l5(3)*l6(3)];
+
+A = [lm1; lm2; lm3; lm4; lm5];
+
+[U, D, V] = svd(A);
+
+C = V(:, 6);
+C = [C(1), C(2)/2, C(4)/2; C(2)/2, C(3), C(5)/2; C(4)/2, C(5)/2, C(6)];
+
+%K = chol(inv(C(1:2, 1:2)));
+%v = inv(C(1:2, 1:2)) * C(1:2, 3);
+
+[U, D, V] = svd(C);
+
+H = U;
+
+I5 = apply_H(I, H);
+figure; imshow(uint8(I5));
