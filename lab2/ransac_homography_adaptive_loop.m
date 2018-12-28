@@ -1,6 +1,6 @@
 function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 
-[Ncoords, Npoints] = size(x1);
+[Npoints, Ncoords] = size(x1);
 
 % ransac
 it = 0;
@@ -8,7 +8,7 @@ best_inliers = [];
 while it < max_it
     
     points = randomsample(Npoints, 4);
-    H = homography2d(x1(:,points), x2(:,points)); % ToDo: you have to create this function
+    H = homography2d(x1(points,:), x2(points,:)); % ToDo: you have to create this function
     inliers = compute_inliers(H, x1, x2, th);
     
     % test if it is the best model so far
@@ -42,8 +42,8 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
     
 
     % compute the symmetric geometric error
-    d2 = % ToDo
-    idx_inliers = find(d2 < th.^2);
+%     d2 = % ToDo
+%     idx_inliers = find(d2 < th.^2);
 
 
 function xn = normalise(x)    
