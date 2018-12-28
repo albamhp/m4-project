@@ -83,8 +83,8 @@ showMatchedFeatures(ima, imb, points_b(matches_bc(:, 1)), ...
 
 %% Compute homography (normalized DLT) between a and b, play with the homography
 th = 3;
-xab_a = [points_a.Location(matches_ab(:, 1)); ones(length(matches_ab), 1)];
-xab_b = [points_b.Location(matches_ab(:, 2)); ones(length(matches_ab), 1)];
+xab_a = [points_a.Location(matches_ab(:, 1),:), ones(length(matches_ab), 1)];
+xab_b = [points_b.Location(matches_ab(:, 2),:), ones(length(matches_ab), 1)];
 [Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
 figure;
