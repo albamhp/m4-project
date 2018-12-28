@@ -30,7 +30,7 @@ y2 = pt2(2,:);
 w2 = pt2(3,:);
 
 % A initialization
-A = zeros(2*n,9);
+A = zeros(9,9);
 
 % Fill A with the proper values at each point
 for i=1:n
@@ -47,6 +47,8 @@ for i=1:n
 %     A(2*i,4:6) = [0 0 0];
 %     A(2*i,7:9) = -(pt2(1,i)*pt1(:,i))';
 end
+A(9, :) = [0, 0, 0, 0, 0, 0, 0, 0, 1];
+b = [0 0 0 0 0 0 0 0 1]';
 % for i=1:n
 %     A(i,:) = A(i,:)/norm(A(i,:));
 % end
@@ -58,12 +60,10 @@ end
 % Take the last column of the transposed of V, that's the singular
 % vector with the lowest singular value.
 h = V(:,9);
-
-%Homogenizar H
-H=(h/h(9));
+h = A\b;
 
 % Reshape h to be a 3x3 matrix.
-H = reshape(H,3,3);
+H = reshape(h,3,3);
 
 % Desnormalizar
 H = (T2\H*T1);
