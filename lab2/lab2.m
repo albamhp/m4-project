@@ -88,7 +88,7 @@ xab_b = [points_b.Location(matches_ab(:, 2),:), ones(length(matches_ab), 1)];
 [Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
 figure;
-plotmatches(ima, imb, points_a, points_b, ...
+plotmatches(ima, imb, points_a.Location, points_b.Location, ...
     matches_ab(:,inliers_ab), 'Stacking', 'v');
 
 vgg_gui_H(imargb, imbrgb, Hab);
