@@ -20,9 +20,13 @@ imcrgb = imread('Data/castle_int/0014_s.png');
 % imbrgb = imread('Data/aerial/site13/frame00002.png');
 % imcrgb = imread('Data/aerial/site13/frame00003.png');
 
-ima = sum(double(imargb), 3) / 3 / 255;
-imb = sum(double(imbrgb), 3) / 3 / 255;
-imc = sum(double(imcrgb), 3) / 3 / 255;
+% ima = sum(double(imargb), 3) / 3 / 255;
+% imb = sum(double(imbrgb), 3) / 3 / 255;
+% imc = sum(double(imcrgb), 3) / 3 / 255;
+
+ima = rgb2gray(imargb);
+imb = rgb2gray(imbrgb);
+imc = rgb2gray(imcrgb);
 
 % imargb = double(imread('Data/aerial/site22/frame_00001.tif'));
 % imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'));
@@ -35,9 +39,15 @@ imc = sum(double(imcrgb), 3) / 3 / 255;
 %[points_a, desc_a] = sift(ima, 'Threshold', 0.01);
 %[points_b, desc_b] = sift(imb, 'Threshold', 0.01);
 %[points_c, desc_c] = sift(imc, 'Threshold', 0.01);
-[points_a, desc_a] = detectSURFFeatures(ima);
-[points_b, desc_b] = detectSURFFeatures(imb);
-[points_c, desc_c] = detectSURFFeatures(imc);
+
+points_a = detectSURFFeatures(ima);
+desc_a = extractFeatures(ima, points_a);
+points_b = detectSURFFeatures(imb);
+desc_b = extractFeatures(imb, points_b);
+points_c = detectSURFFeatures(imc);
+desc_c = extractFeatures(imc, points_c);
+
+
 
 figure;
 imshow(imargb);%image(imargb)
