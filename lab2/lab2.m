@@ -2,7 +2,7 @@
 %% Lab 2: Image mosaics
 
 addpath('sift');
-
+close all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute image correspondences
 
@@ -52,15 +52,15 @@ desc_c = extractFeatures(imc, points_c);
 figure;
 imshow(imargb);%image(imargb)
 hold on;
-plot(points_a.Location(1,:), points_a.Location(2,:),'+y');
+plot(points_a.Location(:,1), points_a.Location(:,2),'+y');
 figure;
 imshow(imbrgb);%image(imbrgb);
 hold on;
-plot(points_b.Location(1,:), points_b.Location(2,:),'+y');
+plot(points_b.Location(:,1), points_b.Location(:,2),'+y');
 figure;
 imshow(imcrgb);%image(imcrgb);
 hold on;
-plot(points_c.Location(1,:), points_c.Location(2,:),'+y');
+plot(points_c.Location(:,1), points_c.Location(:,2),'+y');
 
 %% Match SIFT keypoints 
 
@@ -68,14 +68,16 @@ plot(points_c.Location(1,:), points_c.Location(2,:),'+y');
 % matches_ab = siftmatch(desc_a, desc_b);
 matches_ab = matchFeatures(desc_a, desc_b);
 figure;
-plotmatches(ima, imb, points_a(1:2,:), points_b(1:2,:), matches_ab, 'Stacking', 'v');
+showMatchedFeatures(ima, imb, points_a(matches_ab(:, 1)), ...
+                    points_b(matches_ab(:, 2)), 'montage')
 
 % between b and c
 % matches_bc = siftmatch(desc_b, desc_c);
 matches_bc = matchFeatures(desc_b, desc_c);
 figure;
-plotmatches(imb, imc, points_b(1:2,:), points_c(1:2,:), matches_bc, 'Stacking', 'v');
-
+showMatchedFeatures(ima, imb, points_b(matches_bc(:, 1)), ...
+                    points_c(matches_bc(:, 2)), 'montage')
+                
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Compute the homography (DLT algorithm) between image pairs
 
