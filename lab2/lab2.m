@@ -52,15 +52,15 @@ desc_c = extractFeatures(imc, points_c);
 figure;
 imshow(imargb);%image(imargb)
 hold on;
-plot(points_a(1,:), points_a(2,:),'+y');
+plot(points_a.Location(1,:), points_a.Location(2,:),'+y');
 figure;
 imshow(imbrgb);%image(imbrgb);
 hold on;
-plot(points_b(1,:), points_b(2,:),'+y');
+plot(points_b.Location(1,:), points_b.Location(2,:),'+y');
 figure;
 imshow(imcrgb);%image(imcrgb);
 hold on;
-plot(points_c(1,:), points_c(2,:),'+y');
+plot(points_c.Location(1,:), points_c.Location(2,:),'+y');
 
 %% Match SIFT keypoints 
 
