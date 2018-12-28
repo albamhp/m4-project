@@ -20,9 +20,9 @@ site13_imargb = imread('Data/aerial/site13/frame00000.png');
 site13_imbrgb = imread('Data/aerial/site13/frame00002.png');
 site13_imcrgb = imread('Data/aerial/site13/frame00003.png');
 
-site22_imargb = imread('Data/aerial/site22/frame00001.tif');
-site22_imbrgb = imread('Data/aerial/site22/frame00018.tif');
-site22_imcrgb = imread('Data/aerial/site22/frame00030.tif');
+site22_ima = imread('Data/aerial/site22/frame_00001.tif');
+site22_imb = imread('Data/aerial/site22/frame_00018.tif');
+site22_imc = imread('Data/aerial/site22/frame_00030.tif');
 
 
 % ima = sum(double(imargb), 3) / 3 / 255;
@@ -40,10 +40,6 @@ castle_imc = rgb2gray(castle_imcrgb);
 site13_ima = rgb2gray(site13_imargb);
 site13_imb = rgb2gray(site13_imbrgb);
 site13_imc = rgb2gray(site13_imcrgb);
-
-site22_ima = rgb2gray(site22_imargb);
-site22_imb = rgb2gray(site22_imbrgb);
-site22_imc = rgb2gray(site22_imcrgb);
 
 % imargb = double(imread('Data/aerial/site22/frame_00001.tif'));
 % imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'));
@@ -303,9 +299,9 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
+%iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
+%iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
+%iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;

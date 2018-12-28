@@ -44,10 +44,8 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
     x1t = zeros(length(x1),3);
     x2t = zeros(length(x2),3);
     
-    for i = 1:length(x1)
-        x1t(i,:) = (H*x1(i,:)')';
-        x2t(i,:) = (inv(H)*x2(i,:)')';
-    end
+    x1t = (H*x1')';
+    x2t = (inv(H)*x2')';
     
     d2 = computed2(x1t, x2) + computed2(x1, x2t);
     idx_inliers = find(d2 < th.^2);
