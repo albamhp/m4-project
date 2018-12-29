@@ -96,7 +96,7 @@ plotmatches(imb, imc, points_b.Location', points_c.Location', matches_bc', 'Stac
 th = 3;
 xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
 xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
-[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
+[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 5000); % ToDo: complete this function
 
 figure;
 plotmatches(ima, imb, points_a.Location', points_b.Location', ...
@@ -108,7 +108,7 @@ vgg_gui_H(imargb, imbrgb, Hab);
 %% Compute homography (normalized DLT) between b and c, play with the homography
 xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
 xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
-[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
+[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 5000); 
 
 figure;
 plotmatches(imb, imc, points_b.Location', points_c.Location', ...
@@ -176,11 +176,11 @@ matches_bc = matchFeatures(desc_b, desc_c);
 th = 10;
 xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
 xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
-[Hab, ~] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
+[Hab, ~] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 5000); % ToDo: complete this function
 
 xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
 xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
-[Hbc, ~] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
+[Hbc, ~] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 5000); 
 
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(site13_imbrgb, eye(3), corners);   % ToDo: complete the call to the function
@@ -230,15 +230,12 @@ title('Aerial 22 Mosaic A-B-C');
 
 % Homography ab
 
-x =  [points_a.Location(matches_ab(:, 1), :), ones(size(matches_ab, 1))']';  %ToDo: set the non-homogeneous point coordinates of the 
-xp = Hab * x; %      point correspondences we will refine with the geometric method
-xp = xhp./(repmat(xhp(3,:),3,1)); % Normalize
-
 % Assuming normalization
-x = x(1:2, :);
-xp = xp(1:2, :);
+x = points_b.Location(matches_ab(:, 2), :)'; %      point correspondences we will refine with the geometric method
+xp =  points_a.Location(matches_ab(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hab(:) ; x(:)]; % The parameters or independent variables
+P0 = double(P0);
 
 Y_initial = gs_errfunction( P0, x, xp ); % ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
