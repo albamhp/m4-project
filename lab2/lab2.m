@@ -258,33 +258,30 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 xhat = P(10:end);
-xhat = reshape(xhat,length(P(10:end))/2, 2);
-xhat = xhat';
-xhatp = H * xhat;
-    
-figure;
-imshow(imargb); %image(imargb);
-hold on;
-plot(x(1,:), x(2,:),'+y');
-plot(xhat(1,:), xhat(2,:),'+c');
+xhat = reshape(xhat, 2, length(P0(10:end))/2);
+xhat = [xhat; ones(1, length(P0(10:end))/2)];
+xhatp = Hab_r * xhat;
 
 figure;
-imshow(imbrgb); %image(imbrgb);
+imshow(imargb); %image(imargb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
 
+figure;
+imshow(imbrgb); %image(imbrgb);
+hold on;
+plot(x(1,:), x(2,:),'+y');
+plot(xhat(1,:), xhat(2,:),'+c');
+
 %%  Homography bc
 
-x =  [points_b.Location(matches_bc(:, 1), :), ones(size(matches_bc, 1))']';  %ToDo: set the non-homogeneous point coordinates of the 
-xp = Hbc * x; %      point correspondences we will refine with the geometric method
-xp = xhp./(repmat(xhp(3,:),3,1)); % Normalize
-
 % Assuming normalization
-x = x(1:2, :);
-xp = xp(1:2, :);
+x = points_c.Location(matches_bc(:, 2), :)'; %      point correspondences we will refine with the geometric method
+xp =  points_b.Location(matches_bc(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hbc(:) ; x(:)]; % The parameters or independent variables
+P0 = double(P0);
 
 Y_initial = gs_errfunction( P0, x, xp ); % ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
@@ -294,7 +291,7 @@ err_initial = sum( sum( Y_initial.^2 ));
 options = optimset('Algorithm', 'levenberg-marquardt');
 P = lsqnonlin(@(t) gs_errfunction(t, x, xp), P0, [], [], options);
 
-Hab_r = reshape(P(1:9), 3, 3 );
+Hbc_r = reshape(P(1:9), 3, 3 );
 f = gs_errfunction( P, x, xp ); % lsqnonlin does not return f
 err_final = sum( sum( f.^2 ));
 
@@ -307,28 +304,27 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 xhat = P(10:end);
-xhat = reshape(xhat,length(P(10:end))/2, 2);
-xhat = xhat';
-xhatp = H * xhat;
-
+xhat = reshape(xhat, 2, length(P0(10:end))/2);
+xhat = [xhat; ones(1, length(P0(10:end))/2)];
+xhatp = Hab_r * xhat;
 
 figure;
 imshow(imbrgb);%image(imbrgb);
 hold on;
-plot(x(1,:), x(2,:),'+y');
-plot(xhat(1,:), xhat(2,:),'+c');
+plot(xp(1,:), xp(2,:),'+y');
+plot(xhatp(1,:), xhatp(2,:),'+c');
 
 figure;
 imshow(imcrgb);%image(imcrgb);
 hold on;
-plot(xp(1,:), xp(2,:),'+y');
-plot(xhatp(1,:), xhatp(2,:),'+c');
+plot(x(1,:), x(2,:),'+y');
+plot(xhat(1,:), xhat(2,:),'+c');
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
-%iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
-%iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
-%iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
+iwb = apply_H_v2(imbrgb, eye(3), corners); % ToDo: complete the call to the function
+iwa = apply_H_v2(imargb, Hab_r, corners); % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, inv(Hbc_r), corners); % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
