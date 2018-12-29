@@ -1,6 +1,6 @@
 function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 
-[Npoints, Ncoords] = size(x1);
+[~, Npoints] = size(x1);
 
 % ransac
 it = 0;
@@ -8,9 +8,9 @@ best_inliers = [];
 while it < max_it
     
     points = randomsample(Npoints, 4);
-    H = homography2d(x1(points,:)', x2(points,:)'); % ToDo: you have to create this function
+    H = homography2d(x1(:, points), x2(:, points)); % ToDo: you have to create this function
     inliers = compute_inliers(H, x1, x2, th);
-    
+
     % test if it is the best model so far
     if length(inliers) > length(best_inliers)
         best_inliers = inliers;
@@ -18,18 +18,18 @@ while it < max_it
     
     % update estimate of max_it (the number of trials) to ensure we pick, 
     % with probability p, an initial data set with no outliers
-    fracinliers =  length(inliers)/Npoints;
-    pNoOutliers = 1 -  fracinliers^4;
-    pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
-    pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
-    p=0.99;
-    max_it = log(1-p)/log(pNoOutliers);
+%     fracinliers =  length(inliers)/Npoints;
+%     pNoOutliers = 1 -  fracinliers^4;
+%     pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
+%     pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
+%     p=0.99;
+%     max_it = log(1-p)/log(pNoOutliers);
     
     it = it + 1;
 end
 
 % compute H from all the inliers
-H = homography2d(x1(:,best_inliers), x2(:,best_inliers));
+H = homography2d(x1(1:2, :), x2(1:2, :));
 idx_inliers = best_inliers;
 
 
@@ -44,15 +44,15 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
     x1t = zeros(length(x1),3);
     x2t = zeros(length(x2),3);
     
-    x1t = (H*x1')';
-    x2t = (inv(H)*x2')';
+    x1t = (H*x1);
+    x2t = (inv(H)*x2);
     
     d2 = computed2(x1t, x2) + computed2(x1, x2t);
     idx_inliers = find(d2 < th.^2);
 
 function d2=computed2(a, b)
-    d2 = ((a(:,1)./a(:,3))-(b(:,1)./b(:,3))).^2 ...
-    + ((a(:,2)./a(:,3))-(b(:,2)./b(:,3))).^2;
+    d2 = ((a(1, :)./a(3, :))-(b(1, :)./b(3, :))).^2 ...
+    + ((a(2, :)./a(3, :))-(b(2, :)./b(3, :))).^2;
 
 
 function xn = normalise(x)    

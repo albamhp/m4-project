@@ -81,40 +81,38 @@ plot(points_c.Location(:,1), points_c.Location(:,2),'+y');
 % matches_ab = siftmatch(desc_a, desc_b);
 matches_ab = matchFeatures(desc_a, desc_b);
 figure;
-showMatchedFeatures(ima, imb, points_a(matches_ab(:, 1)), ...
-                    points_b(matches_ab(:, 2)), 'montage')
+plotmatches(ima, imb, points_a.Location', points_b.Location', matches_ab', 'Stacking', 'v');
 
 % between b and c
 % matches_bc = siftmatch(desc_b, desc_c);
 matches_bc = matchFeatures(desc_b, desc_c);
 figure;
-showMatchedFeatures(ima, imb, points_b(matches_bc(:, 1)), ...
-                    points_c(matches_bc(:, 2)), 'montage')
+plotmatches(imb, imc, points_b.Location', points_c.Location', matches_bc', 'Stacking', 'v');
                 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Compute the homography (DLT algorithm) between image pairs
 
 %% Compute homography (normalized DLT) between a and b, play with the homography
 th = 3;
-xab_a = [points_a.Location(matches_ab(:, 1),:), ones(length(matches_ab), 1)];
-xab_b = [points_b.Location(matches_ab(:, 2),:), ones(length(matches_ab), 1)];
+xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
 [Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
 figure;
-plotmatches(ima, imb, points_a.Location, points_b.Location, ...
-    matches_ab(:,inliers_ab), 'Stacking', 'v');
+plotmatches(ima, imb, points_a.Location', points_b.Location', ...
+    matches_ab(inliers_ab, :)', 'Stacking', 'v');
 
 vgg_gui_H(imargb, imbrgb, Hab);
 
 
 %% Compute homography (normalized DLT) between b and c, play with the homography
-xbc_b = [points_b(matches_bc(1,:), :); ones(1, length(matches_bc))];
-xbc_c = [points_c(matches_bc(2,:), :); ones(1, length(matches_bc))];
+xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
+xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
 [Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
 
 figure;
-plotmatches(imb, imc, points_b(1:2,:), points_c(1:2,:), ...
-    matches_bc(:,inliers_bc), 'Stacking', 'v');
+plotmatches(imb, imc, points_b.Location', points_c.Location', ...
+    matches_bc(inliers_bc, :)', 'Stacking', 'v');
 
 vgg_gui_H(imbrgb, imcrgb, Hbc);
 
@@ -123,14 +121,16 @@ vgg_gui_H(imbrgb, imcrgb, Hbc);
 
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(imbrgb, eye(3), corners);   % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, inv(Hab), corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, Hbc, corners);    % ToDo: complete the call to the function
+iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
 
 % ToDo: compute the mosaic with castle_int images
+
+%% 3.2
 
 points_a = detectSURFFeatures(castle_ima);
 desc_a = extractFeatures(castle_ima, points_a);
@@ -142,79 +142,81 @@ desc_c = extractFeatures(castle_imc, points_c);
 matches_ab = matchFeatures(desc_a, desc_b);
 matches_bc = matchFeatures(desc_b, desc_c);
 
-th = 3;
-xab_a = [points_a.Location(matches_ab(:, 1), :); ones(length(matches_ab), 1)];
-xab_b = [points_b.Location(matches_ab(:, 2), :); ones(length(matches_ab), 1)];
-[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
+th = 15;
+xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
+[Hab, ~] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
-xbc_b = [points_b(1:2, matches_bc(1,:), :); ones(1, length(matches_bc))];
-xbc_c = [points_c(1:2, matches_bc(2,:), :); ones(1, length(matches_bc))];
-[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
+xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
+xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
+[Hbc, ~] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
 
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(castle_imbrgb, eye(3), corners);   % ToDo: complete the call to the function
-iwa = apply_H_v2(castle_imargb, inv(Hab), corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(castle_imcrgb, Hbc, corners);    % ToDo: complete the call to the function
+iwa = apply_H_v2(castle_imargb, Hab, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(castle_imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Castle Mosaic A-B-C');
 
+%% 3.3
 % ToDo: compute the mosaic with aerial images set 13
 
-points_a = detectSURFFeatures(aerial13_ima);
-desc_a = extractFeatures(aerial13_ima, points_a);
-points_b = detectSURFFeatures(aerial13_imb);
-desc_b = extractFeatures(aerial13_imb, points_b);
-points_c = detectSURFFeatures(aerial13_imc);
-desc_c = extractFeatures(aerial13_imc, points_c);
+points_a = detectSURFFeatures(site13_ima);
+desc_a = extractFeatures(site13_ima, points_a);
+points_b = detectSURFFeatures(site13_imb);
+desc_b = extractFeatures(site13_imb, points_b);
+points_c = detectSURFFeatures(site13_imc);
+desc_c = extractFeatures(site13_imc, points_c);
 
 matches_ab = matchFeatures(desc_a, desc_b);
 matches_bc = matchFeatures(desc_b, desc_c);
 
-th = 3;
-xab_a = [points_a.Location(matches_ab(:, 1), :); ones(length(matches_ab), 1)];
-xab_b = [points_b.Location(matches_ab(:, 2), :); ones(length(matches_ab), 1)];
-[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
+th = 10;
+xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
+[Hab, ~] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
-xbc_b = [points_b(1:2, matches_bc(1,:), :); ones(1, length(matches_bc))];
-xbc_c = [points_c(1:2, matches_bc(2,:), :); ones(1, length(matches_bc))];
-[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
+xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
+xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
+[Hbc, ~] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
 
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(aerial13_imbrgb, eye(3), corners);   % ToDo: complete the call to the function
-iwa = apply_H_v2(aerial13_imargb, inv(Hab), corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(aerial13_imcrgb, Hbc, corners);    % ToDo: complete the call to the function
+iwb = apply_H_v2(site13_imbrgb, eye(3), corners);   % ToDo: complete the call to the function
+iwa = apply_H_v2(site13_imargb, Hab, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(site13_imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Aerial 13 Mosaic A-B-C');
 
+%% 3.4
 % ToDo: compute the mosaic with aerial images set 22
 
-points_a = detectSURFFeatures(aerial22_ima);
-desc_a = extractFeatures(aerial22_ima, points_a);
-points_b = detectSURFFeatures(aerial22_imb);
-desc_b = extractFeatures(aerial22_imb, points_b);
-points_c = detectSURFFeatures(aerial22_imc);
-desc_c = extractFeatures(aerial22_imc, points_c);
+points_a = detectSURFFeatures(site22_ima);
+desc_a = extractFeatures(site22_ima, points_a);
+points_b = detectSURFFeatures(site22_imb);
+desc_b = extractFeatures(site22_imb, points_b);
+points_c = detectSURFFeatures(site22_imc);
+desc_c = extractFeatures(site22_imc, points_c);
 
 matches_ab = matchFeatures(desc_a, desc_b);
 matches_bc = matchFeatures(desc_b, desc_c);
 
 th = 3;
-xab_a = [points_a.Location(matches_ab(:, 1), :); ones(length(matches_ab), 1)];
-xab_b = [points_b.Location(matches_ab(:, 2), :); ones(length(matches_ab), 1)];
+xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
 [Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
-xbc_b = [points_b(1:2, matches_bc(1,:), :); ones(1, length(matches_bc))];
-xbc_c = [points_c(1:2, matches_bc(2,:), :); ones(1, length(matches_bc))];
+xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
+xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
 [Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
 
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(aerial22_imbrgb, eye(3), corners);   % ToDo: complete the call to the function
-iwa = apply_H_v2(aerial22_imargb, inv(Hab), corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(aerial22_imcrgb, Hbc, corners);    % ToDo: complete the call to the function
+iwb = apply_H_v2(site22_imb, eye(3), corners);   % ToDo: complete the call to the function
+iwa = apply_H_v2(site22_ima, Hab, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(site22_imc, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;

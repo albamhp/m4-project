@@ -30,43 +30,36 @@ y2 = pt2(2,:);
 w2 = pt2(3,:);
 
 % A initialization
-A = zeros(9,9);
+A = zeros(8,9);
 
 % Fill A with the proper values at each point
 for i=1:n
     A(2*i-1,1:3) = [0,0,0];
-    A(2*i-1,4:6) = -w2(i)*[x1(i),y1(i),w1(i)]';
-    A(2*i-1,7:9) =  y2(i)*[x1(i),y1(i),w1(i)]';
-    A(2*i,1:3) = w2(i)*[x1(i),y1(i),w1(i)]';
+    A(2*i-1,4:6) = -w2(i).*[x1(i),y1(i),w1(i)];
+    A(2*i-1,7:9) =  y2(i).*[x1(i),y1(i),w1(i)];
+    A(2*i,1:3) = -w2(i).*[x1(i),y1(i),w1(i)];
     A(2*i,4:6) =  [0,0,0];
-    A(2*i,7:9) = -x2(i)*[x1(i),y1(i),w1(i)]';
-%     A(2*i-1,1:3) = [0 0 0];
-%     A(2*i-1,4:6) = -(pt2(3,i)*pt1(:,i))';
-%     A(2*i-1,7:9) = (pt2(2,i)*pt1(:,i))';
-%     A(2*i,1:3) = (pt2(3,i)*pt1(:,i))';
-%     A(2*i,4:6) = [0 0 0];
-%     A(2*i,7:9) = -(pt2(1,i)*pt1(:,i))';
+    A(2*i,7:9) = x2(i).*[x1(i),y1(i),w1(i)];
 end
-A(9, :) = [0, 0, 0, 0, 0, 0, 0, 0, 1];
-b = [0 0 0 0 0 0 0 0 1]';
+
 % for i=1:n
 %     A(i,:) = A(i,:)/norm(A(i,:));
 % end
 
 % Singular Value Decomposition
 % http://es.mathworks.com/help/matlab/ref/svd.html?s_tid=srchtitle
-[U,D,V] =svd(A);
+[~,~,V] =svd(A);
 
 % Take the last column of the transposed of V, that's the singular
 % vector with the lowest singular value.
 h = V(:,9);
-h = A\b;
 
 % Reshape h to be a 3x3 matrix.
 H = reshape(h,3,3);
 
 % Desnormalizar
 H = (T2\H*T1);
-%H= inv(T2)*H*T1;
+
+H = H ./ H(3, 3);
 
 end
