@@ -458,17 +458,27 @@ title('Mosaic A-B-C');
 %     x = euclid(P{i} * homog(X));
 %     vgg_scatter_plot(x, 'g');
 % end
-% 
-% 
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 6. OPTIONAL: Detect the UPF logo in the two UPF images using the 
-% %%              DLT algorithm (folder "logos").
-% %%              Interpret and comment the results.
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 7. OPTIONAL: Replace the logo of the UPF by the master logo
-% %%              in one of the previous images using the DLT algorithm.
-% 
-% 
-% 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 6. OPTIONAL: Detect the UPF logo in the two UPF images using the 
+%%              DLT algorithm (folder "logos").
+%%              Interpret and comment the results.
+
+% Manually Keypoints Detection
+filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
+images = cell(size(filenames,1),1);
+for i=1:size(filenames,1)
+    images{i,1}=(imread(filenames{i}));
+end
+ld = 1;
+np = 4;     % Number of points to pick.
+[points] = interest_points(images, ld, np);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 7. OPTIONAL: Replace the logo of the UPF by the master logo
+%%              in one of the previous images using the DLT algorithm.
+
+
+
