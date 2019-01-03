@@ -512,20 +512,9 @@ else
     
     matches_ab = matchFeatures(desc_a, desc_b);
     
-    xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
-    xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
-    
-    H = homography2d(xab_a, xab_b);
-    [h,w,c] = size(img_dst);
-
-    corners = [0 w-1 0 h-1];
-    [img_transf] = apply_H_v2(img_src , H, corners);
-    figure
-    imagesc(img_transf)
-    figure;
-    imshow(max(img_transf, img_dst));
-
-    
+    pts_src = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+    pts_dst = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
+        
 end
 
 % figure;
