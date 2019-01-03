@@ -377,14 +377,14 @@ for i = 1:N
     fprintf('done\n');
 
     % Fit homography and remove outliers.
-    x1 = pointsT(1:2, matches(1, :));
-    x2 = points{i}(1:2, matches(2, :));
+    x1 = [pointsT.Location(matches(:,1), 1:2)'; ones(1, length(matches))];
+    x2 = [points{i}.Location(matches(:,2), 1:2)';ones(1, length(matches))];
     H{i} = 0;
-    [H{i}, inliers] =  ransac_homography_adaptive_loop(homog(x1), homog(x2), 3, 1000);
+    [H{i}, inliers] =  ransac_homography_adaptive_loop(x1, x2, 3, 1000);
 
     % Plot inliers.
     figure;
-    plotmatches(Tg, Ig{i}, pointsT(1:2,:), points{i}(1:2,:), matches(:, inliers));
+    plotmatches(Tg, Ig{i}, pointsT.Location(:, 1:2)', points{i}.Location(:,1:2)', matches(inliers,:)');
 
     % Play with the homography
     %vgg_gui_H(T, I{i}, H{i});
