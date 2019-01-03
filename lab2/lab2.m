@@ -466,34 +466,55 @@ title('Mosaic A-B-C');
 %%              DLT algorithm (folder "logos").
 %%              Interpret and comment the results.
 
-% Manually Keypoints Detection
-filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
+filenames = {'Data/logos/UPFstand.jpg';'Data/logos/logoUPF.png';'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
 images = cell(size(filenames,1),1);
 for i=1:size(filenames,1)
-    images{i,1}=(imread(filenames{i}));
+        images{i,1}=(imread(filenames{i}));
 end
-ld = 0;
-np = 4;     % Number of points to pick.
-[points] = interest_points(images, ld, np);
-img_dest = images{2,1};
-img_src = images{1,1};
+   
+option = "Auto";
+if (option =="Manual")
+    % Manually Keypoints Detection
+    
+    ld = 0;
+    np = 4;     % Number of points to pick.
+    [points] = interest_points(images, ld, np);
+    img_dest = images{4,1};
+    img_src = images{3,1};
 
-[h,w,c] = size(img_dest);
+    [h,w,c] = size(img_dest);
 
-pts_dst = points(5:6,:);
-pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
+    pts_dst = points(5:6,:);
+    pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
+else
+    % Auto Keypoints Detection
+    img_dest = images{1,1};
+    img_src = images{3,1};
+    img_match = images{2,1};
+    
+    img_dest_gray = rgb2gray(img_dest);
+    img_match_gray = rgb2gray(img_match);
+    
+    points_a = detectSURFFeatures(img_match_gray);
+    desc_a = extractFeatures(img_match_gray, points_a);
+    points_b = detectSURFFeatures(img_dest_gray);
+    desc_b = extractFeatures(img_dest_gray, points_b);
+    
+    
+    matches_ab = matchFeatures(desc_a, desc_b);
+    figure;
+    plotmatches(img_match_gray, img_dest_gray, points_a.Location', points_b.Location', matches_ab', 'Stacking', 'v');
 
-H = homography2d(pts_src, pts_dst);
-corners = [0 w-1 0 h-1];
-
-[img_transf] = apply_H_v2(img_src , H, corners);
-
-figure;
-imshow(max(img_transf, img_dest));%image(max(iwc, max(iwb, iwa)));axis off;
+    
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Replace the logo of the UPF by the master logo
 %%              in one of the previous images using the DLT algorithm.
 
-
+H = homography2d(pts_src, pts_dst);
+corners = [0 w-1 0 h-1];
+[img_transf] = apply_H_v2(img_src , H, corners);
+figure;
+imshow(max(img_transf, img_dest));
 
