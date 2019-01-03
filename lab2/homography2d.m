@@ -55,7 +55,7 @@ end
 h = V(:,9);
 
 % Reshape h to be a 3x3 matrix.
-H = reshape(h,3,3);
+H = reshape(h,3,3)';
 
 % Desnormalizar
 H = (T2\H*T1);

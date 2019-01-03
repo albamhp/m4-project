@@ -466,7 +466,7 @@ title('Mosaic A-B-C');
 %%              DLT algorithm (folder "logos").
 %%              Interpret and comment the results.
 
-option = "Auto";
+option = "Manual";
 if (option =="Manual")
     filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
     images = cell(size(filenames,1),1);   
@@ -531,7 +531,7 @@ end
 % figure;
 % imagesc(img_dst)
 % hold on
-% plot(pts_dst(1,2), pts_dst(2,2), 'r*')
+% plot(pts_dst(1,:), pts_dst(2,:), 'r*')
 % hold off
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -548,3 +548,10 @@ imagesc(img_transf)
 figure;
 imshow(max(img_transf, img_dst));
 
+% figure;
+% imshow(img_dst)
+% hold on
+% pts_src_p = H*[pts_src; 1 1 1 1];
+% pts_src_p = pts_src_p ./ repmat(pts_src_p(end,:), size(pts_src_p,1), 1);
+% plot(pts_src_p(1,:), pts_src_p(2, :), 'r*')
+% hold off
