@@ -338,6 +338,7 @@ title('Mosaic A-B-C');
 %% 5. OPTIONAL: Calibration with a planar pattern
 
 clear all;
+close all;
 
 %% Read template and images.
 T     = imread('Data/calib/template.jpg');
@@ -392,11 +393,23 @@ end
 
 %% Compute the Image of the Absolute Conic
 
-%w = ... % ToDo
+V = zeros(6, 6);
+for i = 1:N
+    V(2*i - 1, :) = calculate_V(H{i}, 1, 2)'; 
+    V(2*i, :) = calculate_V(H{i}, 1, 1)' - calculate_V(H{i}, 2, 2)';
+end
+
+[~, ~, V] = svd(V);
+
+omega = V(:, 6);
+w = [omega(1), omega(2), omega(3);
+     omega(2), omega(4), omega(5); 
+     omega(3), omega(5), omega(6)];
  
 %% Recover the camera calibration.
 
-%K = ... % ToDo
+% ToDo check inverses
+K = chol(w);
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
@@ -411,6 +424,10 @@ for i = 1:N
 %     r1 = ...
 %     r2 = ...
 %     t{i} = ...
+
+    r1 = K \ H{i}(:, 1);
+    r2 = K \ H{i}(:, 2);
+    t{i} = K \ H{i}(:, 3);
     
     % Solve the scale ambiguity by forcing r1 and r2 to be unit vectors.
     s = sqrt(norm(r1) * norm(r2)) * sign(t{i}(3));
@@ -420,7 +437,7 @@ for i = 1:N
     R{i} = [r1, r2, cross(r1,r2)];
     
     % Ensure R is a rotation matrix
-    [U S V] = svd(R{i});
+    [U, S, V] = svd(R{i});
     R{i} = U * eye(3) * V';
    
     P{i} = K * [R{i} t{i}];
