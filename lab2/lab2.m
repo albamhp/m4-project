@@ -466,7 +466,7 @@ title('Mosaic A-B-C');
 %%              DLT algorithm (folder "logos").
 %%              Interpret and comment the results.
 
-option = "Manual";
+option = "Auto";
 if (option =="Manual")
     filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
     images = cell(size(filenames,1),1);   
@@ -475,7 +475,6 @@ if (option =="Manual")
         images{i,1}=(imread(filenames{i}));
     end
 
-    
     % Manually Keypoints Detection
     % ld = 1 load saved points, ld = 0 get new points 
     ld = 1;
@@ -498,8 +497,10 @@ else
     
     % Auto Keypoints Detection
     img_dst = images{1,1};
-    img_src = images{3,1};
     img_match = images{2,1};
+    img_src = images{3,1};
+    [rows, cols, a] = size(img_match);
+    img_src =  imresize(img_src, [rows cols]);
     
     img_dest_gray = rgb2gray(img_dst);
     img_match_gray = rgb2gray(img_match);
@@ -509,8 +510,21 @@ else
     points_b = detectSURFFeatures(img_dest_gray);
     desc_b = extractFeatures(img_dest_gray, points_b);
     
-    
     matches_ab = matchFeatures(desc_a, desc_b);
+    
+    xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+    xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
+    
+    H = homography2d(xab_a, xab_b);
+    [h,w,c] = size(img_dst);
+
+    corners = [0 w-1 0 h-1];
+    [img_transf] = apply_H_v2(img_src , H, corners);
+    figure
+    imagesc(img_transf)
+    figure;
+    imshow(max(img_transf, img_dst));
+
     
 end
 
