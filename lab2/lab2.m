@@ -231,13 +231,13 @@ title('Aerial 22 Mosaic A-B-C');
 % Homography ab
 
 % Assuming normalization
-x = points_b.Location(matches_ab(:, 2), :)'; %      point correspondences we will refine with the geometric method
-xp =  points_a.Location(matches_ab(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b.Location(matches_ab(:, 2), :)'; %      point correspondences we will refine with the geometric method
+x =  points_a.Location(matches_ab(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hab(:) ; x(:)]; % The parameters or independent variables
 P0 = double(P0);
 
-Y_initial = gs_errfunction( P0, x, xp ); % ToDo: create this function that we need to pass to the lsqnonlin function
+Y_initial = gs_errfunction( P0, x, xp); % ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
 % (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
 err_initial = sum( sum( Y_initial.^2 ));
@@ -267,18 +267,20 @@ imshow(imargb); %image(imargb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
+hold off;
 
 figure;
 imshow(imbrgb); %image(imbrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
+hold off;
 
 %%  Homography bc
 
 % Assuming normalization
-x = points_c.Location(matches_bc(:, 2), :)'; %      point correspondences we will refine with the geometric method
-xp =  points_b.Location(matches_bc(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_c.Location(matches_bc(:, 2), :)'; %      point correspondences we will refine with the geometric method
+x =  points_b.Location(matches_bc(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hbc(:) ; x(:)]; % The parameters or independent variables
 P0 = double(P0);
@@ -313,12 +315,14 @@ imshow(imbrgb);%image(imbrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
+hold off;
 
 figure;
 imshow(imcrgb);%image(imcrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
+hold off;
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
@@ -532,8 +536,8 @@ H = homography2d(pts_src, pts_dst);
 
 corners = [0 w-1 0 h-1];
 [img_transf] = apply_H_v2(img_src , H, corners);
-figure
-imagesc(img_transf)
+figure;
+imagesc(img_transf);
 figure;
 imshow(max(img_transf, img_dst));
 
