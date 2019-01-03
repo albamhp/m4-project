@@ -29,7 +29,7 @@ while it < max_it
 end
 
 % compute H from all the inliers
-H = homography2d(x1(1:2, :), x2(1:2, :));
+H = homography2d(x1(1:2, best_inliers), x2(1:2, best_inliers));
 idx_inliers = best_inliers;
 
 
