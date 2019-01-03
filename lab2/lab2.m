@@ -465,11 +465,11 @@ title('Mosaic A-B-C');
 %% 6. OPTIONAL: Detect the UPF logo in the two UPF images using the 
 %%              DLT algorithm (folder "logos").
 %%              Interpret and comment the results.
-images = cell(size(filenames,1),1);   
 
 option = "Manual";
 if (option =="Manual")
     filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
+    images = cell(size(filenames,1),1);   
 
     for i=1:size(filenames,1)
         images{i,1}=(imread(filenames{i}));
@@ -490,6 +490,7 @@ if (option =="Manual")
     pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
 else
     filenames = {'Data/logos/UPFstand.jpg';'Data/logos/logoUPF.png';'Data/logos/logo_master.png'};
+    images = cell(size(filenames,1),1);   
 
     for i=1:size(filenames,1)
         images{i,1}=(imread(filenames{i}));
