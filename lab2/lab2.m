@@ -472,9 +472,24 @@ images = cell(size(filenames,1),1);
 for i=1:size(filenames,1)
     images{i,1}=(imread(filenames{i}));
 end
-ld = 1;
+ld = 0;
 np = 4;     % Number of points to pick.
 [points] = interest_points(images, ld, np);
+img_dest = images{2,1};
+img_src = images{1,1};
+
+[h,w,c] = size(img_dest);
+
+pts_dst = points(5:6,:);
+pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
+
+H = homography2d(pts_src, pts_dst);
+corners = [0 w-1 0 h-1];
+
+[img_transf] = apply_H_v2(img_src , H, corners);
+
+figure;
+imshow(max(img_transf, img_dest));%image(max(iwc, max(iwb, iwa)));axis off;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Replace the logo of the UPF by the master logo
