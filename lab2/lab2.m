@@ -231,8 +231,8 @@ title('Aerial 22 Mosaic A-B-C');
 % Homography ab
 
 % Assuming normalization
-xp = points_b.Location(matches_ab(:, 2), :)'; %      point correspondences we will refine with the geometric method
-x =  points_a.Location(matches_ab(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b.Location(matches_ab(inliers_ab, 2), :)'; %      point correspondences we will refine with the geometric method
+x =  points_a.Location(matches_ab(inliers_ab, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hab(:) ; x(:)]; % The parameters or independent variables
 P0 = double(P0);
@@ -279,13 +279,13 @@ hold off;
 %%  Homography bc
 
 % Assuming normalization
-xp = points_c.Location(matches_bc(:, 2), :)'; %      point correspondences we will refine with the geometric method
-x =  points_b.Location(matches_bc(:, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_c.Location(matches_bc(inliers_bc, 2), :)'; %      point correspondences we will refine with the geometric method
+x =  points_b.Location(matches_bc(inliers_bc, 1), :)';  %ToDo: set the non-homogeneous point coordinates of the 
 
 P0 = [Hbc(:) ; x(:)]; % The parameters or independent variables
 P0 = double(P0);
 
-Y_initial = gs_errfunction( P0, x, xp ); % ToDo: create this function that we need to pass to the lsqnonlin function
+Y_initial = gs_errfunction( P0, x, xp); % ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
 % (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
 err_initial = sum( sum( Y_initial.^2 ));
