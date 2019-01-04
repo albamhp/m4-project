@@ -409,7 +409,8 @@ w = [omega(1), omega(2), omega(3);
 %% Recover the camera calibration.
 
 % ToDo check inverses
-K = chol(w);
+K = chol(inv(w));
+K = K ./ K(3, 3);
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
@@ -421,9 +422,6 @@ P = cell(N,1);
 figure;hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
-%     r1 = ...
-%     r2 = ...
-%     t{i} = ...
 
     r1 = K \ H{i}(:, 1);
     r2 = K \ H{i}(:, 2);
@@ -448,14 +446,14 @@ end
 %       provided code
 
 [ny,nx] = size(T);
-p1 = [0 0 0]';
-p2 = [nx 0 0]';
-p3 = [nx ny 0]';
-p4 = [0 ny 0]';
+p1 = [-nx/2 -ny/2 0]';
+p2 = [nx/2 -ny/2 0]';
+p3 = [nx/2 ny/2 0]';
+p4 = [-nx/2 ny/2 0]';
 % Draw planar pattern
 vgg_scatter_plot([p1 p2 p3 p4 p1], 'g');
 % Paint image texture
-surface('XData',[0 nx; 0 nx],'YData',[0 0; 0 0],'ZData',[0 0; -ny -ny],'CData',T,'FaceColor','texturemap');
+surface('XData',[0 nx/2; 0 nx/2],'YData',[0 0; 0 0],'ZData',[0 0; -ny/2 -ny/2],'CData',T,'FaceColor','texturemap');
 colormap(gray);
 axis equal;
 
@@ -473,12 +471,13 @@ end
 cube = [0 0 0; 1 0 0; 1 0 0; 1 1 0; 1 1 0; 0 1 0; 0 1 0; 0 0 0; 0 0 1; 1 0 1; 1 0 1; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 0 1; 0 0 0; 1 0 0; 1 0 0; 1 0 1; 1 0 1; 0 0 1; 0 0 1; 0 0 0; 0 1 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 0 1 1; 0 1 1; 0 1 0; 0 0 0; 0 1 0; 0 1 0; 0 1 1; 0 1 1; 0 0 1; 0 0 1; 0 0 0; 1 0 0; 1 1 0; 1 1 0; 1 1 1; 1 1 1; 1 0 1; 1 0 1; 1 0 0 ]';
 
 X = (cube - .5) * Tw / 4 + repmat([Tw / 2; Th / 2; -Tw / 8], 1, length(cube));
+X = [X; ones(1, length(X))];
 
 for i = 1:N
     figure; colormap(gray);
     imagesc(Ig{i});
     hold on;
-    x = euclid(P{i} * homog(X));
+    x = euclid(P{i} * X);
     vgg_scatter_plot(x, 'g');
 end
 
