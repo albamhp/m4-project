@@ -462,8 +462,9 @@ figure; hold;
 plot_camera(K * eye(3,4), 800, 600, 200);
 % ToDo: complete the call to the following function with the proper
 %       coordinates of the image corners in the new reference system
+corners = [p1, p2, p3, p4, p1; ones(1, 5)];
 for i = 1:N
-    %vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
+    vgg_scatter_plot([inv(R{i}), t{i}] * corners, 'r');
 end
 
 %% Augmented reality: Plot some 3D points on every camera.
