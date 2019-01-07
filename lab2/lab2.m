@@ -204,14 +204,14 @@ desc_c = extractFeatures(site22_imc, points_c);
 matches_ab = matchFeatures(desc_a, desc_b);
 matches_bc = matchFeatures(desc_b, desc_c);
 
-th = 3;
+th = 4;
 xab_a = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
 xab_b = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
-[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
+[Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 2000); % ToDo: complete this function
 
 xbc_b = [points_b.Location(matches_bc(:, 1), :)'; ones(1, length(matches_bc))];
 xbc_c = [points_c.Location(matches_bc(:, 2), :)'; ones(1, length(matches_bc))];
-[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
+[Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 2000); 
 
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(site22_imb, eye(3), corners);   % ToDo: complete the call to the function
@@ -221,9 +221,6 @@ iwc = apply_H_v2(site22_imc, inv(Hbc), corners);    % ToDo: complete the call to
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Aerial 22 Mosaic A-B-C');
-
-% ToDo: comment the results in every of the four cases: say why it works or
-%       does not work
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Refine the homography with the Gold Standard algorithm
@@ -237,9 +234,7 @@ x =  points_a.Location(matches_ab(inliers_ab, 1), :)';  %ToDo: set the non-homog
 P0 = [Hab(:) ; x(:)]; % The parameters or independent variables
 P0 = double(P0);
 
-Y_initial = gs_errfunction( P0, x, xp); % ToDo: create this function that we need to pass to the lsqnonlin function
-% NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
-% (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
+Y_initial = gs_errfunction( P0, x, xp);
 err_initial = sum( sum( Y_initial.^2 ));
 
 options = optimset('Algorithm', 'levenberg-marquardt');
@@ -408,7 +403,6 @@ w = [omega(1), omega(2), omega(3);
  
 %% Recover the camera calibration.
 
-% ToDo check inverses
 K = chol(inv(w));
 K = K ./ K(3, 3);
     
