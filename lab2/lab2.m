@@ -487,81 +487,63 @@ end
 %%              DLT algorithm (folder "logos").
 %%              Interpret and comment the results.
 
-option = "Manual";
-if (option =="Manual")
-    filenames = {'Data/logos/logo_master.png';'Data/logos/UPFbuilding.jpg'};
-    images = cell(size(filenames,1),1);   
+%%
+% Manually Keypoints Detection
 
-    for i=1:size(filenames,1)
-        images{i,1}=(imread(filenames{i}));
-    end
+% ld = 1 load saved points, ld = 0 get new points 
+ld = 1;
+np = 4;     % Number of points to pick.
 
-    % Manually Keypoints Detection
-    % ld = 1 load saved points, ld = 0 get new points 
-    ld = 1;
-    np = 4;     % Number of points to pick.
-    [points] = interest_points(images, ld, np);
-    img_dst = images{2,1};
-    img_src = images{1,1};
+img_dst = imread('Data/logos/UPFbuilding.jpg');
+img_src = imread('Data/logos/logo_master.png');
+[points] = interest_points(img_dst, ld, np);
 
-    [h,w,c] = size(img_src);
+[h,w,c] = size(img_src);
 
-    pts_dst = points(5:6,:);
-    pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
-else
-    filenames = {'Data/logos/UPFstand.jpg';'Data/logos/logoUPF.png';'Data/logos/logo_master.png'};
-    images = cell(size(filenames,1),1);   
-
-    for i=1:size(filenames,1)
-        images{i,1}=(imread(filenames{i}));
-    end
+pts_dst = points(1:2,:);
+pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
     
-    % Auto Keypoints Detection
-    img_dst = images{1,1};
-    img_match = images{2,1};
-    img_src = images{3,1};
-    [rows, cols, a] = size(img_match);
-    img_src =  imresize(img_src, [rows cols]);
-    
-    img_dest_gray = rgb2gray(img_dst);
-    img_match_gray = rgb2gray(img_match);
-    
-    points_a = detectSURFFeatures(img_match_gray);
-    desc_a = extractFeatures(img_match_gray, points_a);
-    points_b = detectSURFFeatures(img_dest_gray);
-    desc_b = extractFeatures(img_dest_gray, points_b);
-    
-    matches_ab = matchFeatures(desc_a, desc_b);
-    
-    pts_src = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
-    pts_dst = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
-        
-end
+% Auto Keypoints Detection
 
-% figure;
-% imagesc(img_dst)
-% hold on
-% plot(pts_dst(1,:), pts_dst(2,:), 'r*')
-% hold off
+img_dst_auto = imread('Data/logos/UPFstand.jpg');
+img_match_auto = imread('Data/logos/logoUPF.png');
+img_src_auto = imread('Data/logos/logo_master.png');
+
+[rows, cols, a] = size(img_match_auto);
+img_src_auto =  imresize(img_src_auto, [rows cols]);
+
+img_dest_gray = rgb2gray(img_dst_auto);
+img_match_gray = rgb2gray(img_match_auto);
+
+points_a = detectSURFFeatures(img_match_gray);
+desc_a = extractFeatures(img_match_gray, points_a);
+points_b = detectSURFFeatures(img_dest_gray);
+desc_b = extractFeatures(img_dest_gray, points_b);
+
+matches_ab = matchFeatures(desc_a, desc_b);
+
+pts_src_auto = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
+pts_dst_auto = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Replace the logo of the UPF by the master logo
 %%              in one of the previous images using the DLT algorithm.
 
+% MANUAL
 H = homography2d(pts_src, pts_dst);
 [h,w,c] = size(img_dst);
 
 corners = [0 w-1 0 h-1];
 [img_transf] = apply_H_v2(img_src , H, corners);
 figure;
-imagesc(img_transf);
-figure;
 imshow(max(img_transf, img_dst));
 
-% figure;
-% imshow(img_dst)
-% hold on
-% pts_src_p = H*[pts_src; 1 1 1 1];
-% pts_src_p = pts_src_p ./ repmat(pts_src_p(end,:), size(pts_src_p,1), 1);
-% plot(pts_src_p(1,:), pts_src_p(2, :), 'r*')
-% hold off
+% AUTO
+H = homography2d(pts_src_auto, pts_dst_auto);
+[h,w,c] = size(img_dst_auto);
+
+corners = [0 w-1 0 h-1];
+[img_transf_auto] = apply_H_v2(img_src_auto , H, corners);
+figure;
+imshow(max(img_transf_auto, img_dst_auto));
