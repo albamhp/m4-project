@@ -4,8 +4,7 @@ function [points] = interest_points(images, ld, num)
 %   points, if is set to 1 you load them from the workspace.
 % - num: is the number of points to pick (min 4).
 
-    [n,~] = size(images);
-    points = nan(4*n, num); 
+    points = nan(2, num); 
     % The first 2n rows are correspondences with left image, second 2n rows, 
     % are right image correspondences. If left image or right image doesn't
     % exist, fill with NaN
@@ -19,14 +18,14 @@ function [points] = interest_points(images, ld, num)
         for i=1:4:size(points,1)
             % Also fill the function pick_points.
             if i ~= size(points,1)-3
-                point = pick_points(images{fix(i/4)+1},images{fix(i/4)+2},num); 
-                points(2+i:5+i,:) = point;
+                point = pick_points(images,num); 
+                points(i:3+i,:) = point;
             end
+           
 
            
         end
         close(figure(1));
-        close(figure(2));
         % http://es.mathworks.com/help/matlab/ref/save.html
         
         save points.mat points
@@ -35,26 +34,20 @@ function [points] = interest_points(images, ld, num)
 
 end
 
-function [point] = pick_points(im1, im2, num)
+function [point] = pick_points(im1, num)
 
     point = zeros(4,num);
     
     figure(1), imshow(uint8(im1)); hold on,
-    figure(2), imshow(uint8(im2)); hold on,
     
     for p=1:num
         figure(1),
+        title('Click on points starting by top left and clock-wise ')
         [y1,x1] = ginput(1);
         plot(y1,x1,'c+');
         
-        figure(2),
-        [y2,x2] = ginput(1);
-        plot(y2,x2,'y+');
-        
-         point(1,p) = y1;
-         point(2,p) = x1;
-         point(3,p) = y2;
-         point(4,p) = x2;
+        point(1,p) = y1;
+        point(2,p) = x1;
         
         
     end
