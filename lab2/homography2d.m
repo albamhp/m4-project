@@ -30,7 +30,7 @@ y2 = pt2(2,:);
 w2 = pt2(3,:);
 
 % A initialization
-A = zeros(8,9);
+A = zeros(2*n,9);
 
 % Fill A with the proper values at each point
 for i=1:n

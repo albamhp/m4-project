@@ -148,7 +148,7 @@ xbc_b2 = [points_b2.Location(matches_bc2(:, 1), :)'; ones(1, length(matches_bc2)
 xbc_c2 = [points_c2.Location(matches_bc2(:, 2), :)'; ones(1, length(matches_bc2))];
 [Hbc2, ~] = ransac_homography_adaptive_loop(xbc_b2, xbc_c2, th2, 1000); 
 
-corners2 = [-400 1200 -100 650];
+corners2 = [-600 1550 -275 775];
 iwb2 = apply_H_v2(castle_imbrgb, eye(3), corners2);   % ToDo: complete the call to the function
 iwa2 = apply_H_v2(castle_imargb, Hab2, corners2);    % ToDo: complete the call to the function
 iwc2 = apply_H_v2(castle_imcrgb, inv(Hbc2), corners2);    % ToDo: complete the call to the function
@@ -179,7 +179,7 @@ xbc_b3 = [points_b3.Location(matches_bc3(:, 1), :)'; ones(1, length(matches_bc3)
 xbc_c3 = [points_c3.Location(matches_bc3(:, 2), :)'; ones(1, length(matches_bc3))];
 [Hbc3, ~] = ransac_homography_adaptive_loop(xbc_b3, xbc_c3, th3, 5000); 
 
-corners3 = [-400 1200 -100 650];
+corners3 = [-300 1300 -100 950];
 iwb3 = apply_H_v2(site13_imbrgb, eye(3), corners3);   % ToDo: complete the call to the function
 iwa3 = apply_H_v2(site13_imargb, Hab3, corners3);    % ToDo: complete the call to the function
 iwc3 = apply_H_v2(site13_imcrgb, inv(Hbc3), corners3);    % ToDo: complete the call to the function
@@ -204,13 +204,13 @@ matches_bc4 = matchFeatures(desc_b4, desc_c4);
 th4 = 3;
 xab_a4 = [points_a4.Location(matches_ab4(:, 1), :)'; ones(1, length(matches_ab4))];
 xab_b4 = [points_b4.Location(matches_ab4(:, 2), :)'; ones(1, length(matches_ab4))];
-[Hab4, inliers_ab4] = ransac_homography_adaptive_loop(xab_a4, xab_b4, th4, 1000); % ToDo: complete this function
+[Hab4, inliers_ab4] = ransac_homography_adaptive_loop(xab_a4, xab_b4, th4, 5000); % ToDo: complete this function
 
 xbc_b4 = [points_b4.Location(matches_bc4(:, 1), :)'; ones(1, length(matches_bc4))];
 xbc_c4 = [points_c4.Location(matches_bc4(:, 2), :)'; ones(1, length(matches_bc4))];
-[Hbc4, inliers_bc4] = ransac_homography_adaptive_loop(xbc_b4, xbc_c4, th4, 1000); 
+[Hbc4, inliers_bc4] = ransac_homography_adaptive_loop(xbc_b4, xbc_c4, th4, 5000); 
 
-corners4 = [-400 1200 -100 650];
+corners4 = [-450 1450 -100 1050];
 iwb4 = apply_H_v2(site22_imb, eye(3), corners4);   % ToDo: complete the call to the function
 iwa4 = apply_H_v2(site22_ima, Hab4, corners4);    % ToDo: complete the call to the function
 iwc4 = apply_H_v2(site22_imc, inv(Hbc4), corners4);    % ToDo: complete the call to the function
@@ -255,14 +255,16 @@ xhat = [xhat; ones(1, length(P0(10:end))/2)];
 xhatp = Hab_r * xhat;
 
 figure;
-imshow(imargb); %image(imargb);
+imshow(imbrgb); %image(imargb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
 hold off;
 
+pause(0.01)
+
 figure;
-imshow(imbrgb); %image(imbrgb);
+imshow(imargb); %image(imbrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
