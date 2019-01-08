@@ -5,6 +5,7 @@ function [points] = interest_points(images, ld, num)
 % - num: is the number of points to pick (min 4).
 
     points = nan(2, num); 
+    
     % The first 2n rows are correspondences with left image, second 2n rows, 
     % are right image correspondences. If left image or right image doesn't
     % exist, fill with NaN

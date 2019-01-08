@@ -484,13 +484,10 @@ end
 %%
 % Manually Keypoints Detection
 
-% ld = 1 load saved points, ld = 0 get new points 
-ld = 1;
-np = 4;     % Number of points to pick.
-
 img_dst = imread('Data/logos/UPFbuilding.jpg');
 img_src = imread('Data/logos/logo_master.png');
-[points] = interest_points(img_dst, ld, np);
+
+load points.mat points
 
 [h,w,c] = size(img_src);
 
