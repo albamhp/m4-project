@@ -72,7 +72,7 @@ mexFunction(int nout, mxArray *out[],
             int nin, const mxArray *in[])
 {
   int M,N,S,smin,K ;
-  const long* dimensions ;
+  const int* dimensions ;
   const double* P_pt ;
   const double* D_pt ;
   double threshold = 0.01 ; /*0.02 ;*/
