@@ -495,6 +495,12 @@ load points.mat points
 
 pts_dst = points(1:2,:);
 pts_src = [0,w-1,w-1,0;0,0,h-1,h-1];
+
+figure;
+imshow(img_dst);%image(imbrgb);
+hold on;
+plot(pts_dst(1,:), pts_dst(2,:),'+y');
+hold off;
     
 % Auto Keypoints Detection
 
@@ -518,6 +524,7 @@ matches_ab = matchFeatures(desc_a, desc_b);
 pts_src_auto = [points_a.Location(matches_ab(:, 1), :)'; ones(1, length(matches_ab))];
 pts_dst_auto = [points_b.Location(matches_ab(:, 2), :)'; ones(1, length(matches_ab))];
 
+plotmatches(img_match_gray, img_dest_gray, points_a.Location(:, 1:2)', points_b.Location(:,1:2)', matches_ab');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Replace the logo of the UPF by the master logo
