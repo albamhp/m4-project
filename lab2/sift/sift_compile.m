@@ -6,7 +6,7 @@ function sift_compile(type)
 
 siftroot = fileparts(which('siftcompile')) ;
 opts = { '-O', '-I.', '-g' } ;
-opts = { opts{:}, '-v' } ;
+opts = { opts{:}, '-v', '-compatibleArrayDims' } ;
 
 if nargin < 1
     type = 'visualc' ;

@@ -59,8 +59,8 @@ uIsRealMatrix(const mxArray* A, int M, int N)
 int
 uIsRealVector(const mxArray* V, int D)
 {
-  size_t M = mxGetM(V) ;
-  size_t N = mxGetN(V) ;
+  int M = mxGetM(V) ;
+  int N = mxGetN(V) ;
   int is_vector = (N == 1) || (M == 1) ;
 
   return
@@ -83,8 +83,8 @@ uIsRealVector(const mxArray* V, int D)
 int
 uIsString(const mxArray* S, int L)
 {
-  size_t M = mxGetM(S) ;
-  size_t N = mxGetN(S) ;
+  int M = mxGetM(S) ;
+  int N = mxGetN(S) ;
 
   return
     mxIsChar(S) &&
