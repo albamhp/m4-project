@@ -21,5 +21,7 @@ function [F] = fundamental_matrix(x1, x2)
     Df(end,end) = 0;
     
     F = Uf * Df * Vf';
+    
+    F = T2'*F*T1;
    
 end

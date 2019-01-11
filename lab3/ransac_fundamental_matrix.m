@@ -9,7 +9,7 @@ F = zeros(3,3);
 
 for i = 1:1000
     F_est = fundamental_matrix(p1,p2);
-    err = sum((p2 .* (F_est * p1')'),2);
+    err = sum((p2 .* (F_est * p1)),2);
     currentInliers = size( find(abs(err) <= th) , 1);
     if (currentInliers > maxInliers)
        F = F_est; 
@@ -17,8 +17,8 @@ for i = 1:1000
     end    
 end
 
-err = sum((xb .* (F * xa')'),2);
+err = sum((p2 .* (F_est * p1)),2);
 [Y,I]  = sort(abs(err),'ascend');
-inliers = I(1:30);
+inliers = I;
 
 end
