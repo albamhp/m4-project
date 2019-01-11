@@ -18,22 +18,23 @@ X = [rand(3,n); ones(1,n)] + [zeros(2,n); 3 * ones(1,n); zeros(1,n)];
 x1_test = P1 * X;
 x2_test = P2 * X;
 
+x1_test = x1_test ./ repmat(x1_test(end,:), size(x1_test,1), 1);
+x2_test = x2_test ./ repmat(x2_test(end,:), size(x2_test,1), 1);
+
 % Estimated fundamental matrix
-F_es = fundamental_matrix(x1_test, x2_test);
-
-x1_4P = x2_test(:,1:4);
-
-K_inv = x1_4P/P2;
+F_es = normalized_fundamental_matrix(x1_test, x2_test);
 
 % Real fundamental matrix
 tx = [0 -t(3) t(2) ; t(3) 0 -t(1) ; -t(2) t(1) 0];
-F_gt =   K_inv' * tx * R * K_inv; % ToDo: write the expression of the real fundamental matrix for P1 and P2
+E = tx * R;
+F_gt = E;
 
 % Evaluation: these two matrices should be very similar
-A1 = F_gt / norm(F_gt)
-A2 = F_es / norm(F_es)
+A1 = F_gt / norm(F_gt);
+A2 = F_es / norm(F_es);
 
-A1./A2
+disp("Cocient between estimated and real fundamental matrices: ")
+disp(A1./A2)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
 
@@ -65,21 +66,21 @@ plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', 'v'
 p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
-% ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 100.0); 
+% If using @algebraic_error, choose 0.005 as threshold
+[F, inliers] = ransac_fundamental_matrix(p1, p2, @geometric_error, 2, 1000); 
 
 % show inliers
 figure;
 plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
 title('Inliers');
 
-vgg_gui_F(im1rgb, im2rgb, F');
+% vgg_gui_F(im1rgb, im2rgb, F');
 
 
 %% Plot some epipolar lines
 
-% l2 = ... % epipolar lines in image 2 % ToDo
-% l1 = ... % epipolar lines in image 1 % ToDo
+l2 = F * p1; % epipolar lines in image 2 % ToDo
+l1 = F' * p2; % epipolar lines in image 1 % ToDo
 
 % choose three random indices
 m1 = inliers(10);
@@ -126,7 +127,7 @@ plot_homog_line(l2(:, m3));
 % of three points on this 3D trajectory at three different time instants 
 % (corresponding to the time when the three other provided images where taken). 
 
-clear all;
+% clear all;
 
 % Read images
 im1rgb = imread('Data/frame_00000.tif');
