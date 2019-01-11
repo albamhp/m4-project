@@ -21,14 +21,19 @@ x2_test = P2 * X;
 % Estimated fundamental matrix
 F_es = fundamental_matrix(x1_test, x2_test);
 
+x1_4P = x2_test(:,1:4);
+
+K_inv = x1_4P/P2;
+
 % Real fundamental matrix
-% F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+tx = [0 -t(3) t(2) ; t(3) 0 -t(1) ; -t(2) t(1) 0];
+F_gt =   K_inv' * tx * R * K_inv; % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
-% F_gt / norm(F_gt)
-% F_es / norm(F_es)
+A1 = F_gt / norm(F_gt)
+A2 = F_es / norm(F_es)
 
-
+A1./A2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
 
