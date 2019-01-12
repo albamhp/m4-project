@@ -1,23 +1,39 @@
-function [F, inliers] = ransac_fundamental_matrix(p1, p2, error_function, th, ite)
-%FUNDAMENTAL_MATRIX_RANSAC Calculate the fundamental matrix using RANSAC
-%   x1 Set of points of the first image
-%   x2 Set of points of the second image  
-%   th thershold 
+function [F, inliers] = ransac_fundamental_matrix(x1, x2, error_function, th, ite)
+% RANSAC_FUNDAMENTAL_MATRIX - calculate fundamental matrix
+%
+% Calculate the fundamental matrix using RANSAC and normalized 8 point 
+% algorithm
+%   
+% Usage: [F, inliers] = ransac_fundamental_matrix(x1, x2, error_function, th, ite)
+%
+% Arguments:
+%   x1             - 3xN array of 2D point correspondences of the first
+%                    image in homogeneous coordinates 
+%   x2             - 3xN array of 2D point correspondences of the second
+%                    image in homogeneous coordinates
+%   error_function - Error function used to calculate the inliers
+%   th             - Threshold to decide whether a pair is an inlier or
+%                    outlier
+%   ite            - Number of iterations
+%
+% Returns:
+%   F       - Fundamental matrix
+%   inliers - Indices of the point correspondences used as inliers
 
     bestInliers = [];
 
     for i = 1:ite
-        points = randomsample(length(p1), 8);
-        F_est = normalized_fundamental_matrix(p1(:,points), p2(:,points));
+        points = randomsample(length(x1), 8);
+        F_est = normalized_fundamental_matrix(x1(:,points), x2(:,points));
         
-        err = error_function(F_est, p1, p2);
+        err = error_function(F_est, x1, x2);
         currentInliers = find(err <= th);
         if (length(currentInliers) > length(bestInliers))
            bestInliers = currentInliers;
         end
     end
 
-    F = normalized_fundamental_matrix(p1(:, bestInliers), p2(:, bestInliers));
+    F = normalized_fundamental_matrix(x1(:, bestInliers), x2(:, bestInliers));
     inliers = bestInliers;
 
 end
