@@ -288,10 +288,9 @@ for i=1:n_frames
                                       @geometric_error, 2, 2000); 
 end
                                              
-% Obtain the point indices representing the van
+% Calculate which keypoints are used in all pictures
 indices = zeros(1 + n_frames, length(points_base));
 
-idx_skate_base = 1:10; % given data
 indices(1, :) = ismember(1:length(points_base), matches_base_reference(1, :));
 
 for i=1:n_frames
