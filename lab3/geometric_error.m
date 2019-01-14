@@ -1,7 +1,7 @@
 function error = geometric_error(F, x1, x2)
 % GEOMETRIC_ERROR - calculate the geometric error
 %
-% Calculate the first order geometric error aproximation of an estimated
+% Calculate the first order geometric error approximation of an estimated
 % fundamental matrix for a set of point correspondences. Also called
 % Sampson error
 %

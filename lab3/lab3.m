@@ -243,7 +243,7 @@ frames_rgb{1} = imread('Data/SkateBoard/IMG0_003.png');
 frames_rgb{2} = imread('Data/SkateBoard/IMG0_004.png');
 
 base = sum(double(base_rgb), 3) / 3 / 255;
-reference = sum(double(reference_rbg), 3) / 3 / 255;
+reference = sum(double(reference_rgb), 3) / 3 / 255;
 
 frames = cell(1, n_frames);
 for i=1:n_frames
