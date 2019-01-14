@@ -222,16 +222,108 @@ pi4 = cross(l1, l4);
 plot(pi4(1)/pi4(3), pi4(2)/pi4(3), 'g*');
 
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 4. OPTIONAL: Photo-sequencing with your own images
-% 
-% % 4.1 Take a set of images of a moving scene from different viewpoints at 
-% %     different time instants. At least two images have to be taken from
-% %     roughly the same location by the same camera.
-% %
-% % 4.2 Implement the first part (until line 16) of the Algorithm 1 of the 
-% %     Photo-sequencing paper with a selection of the detected dynamic
-% %     features. You may reuse the code generated for the previous question.
-% %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 4. OPTIONAL: Photo-sequencing with your own images
 
+% 4.1 Take a set of images of a moving scene from different viewpoints at 
+%     different time instants. At least two images have to be taken from
+%     roughly the same location by the same camera.
+%
+% 4.2 Implement the first part (until line 16) of the Algorithm 1 of the 
+%     Photo-sequencing paper with a selection of the detected dynamic
+%     features. You may reuse the code generated for the previous question.
+%
 
+base_rgb = imread('Data/SkateBoard/IMG0_002.png');
+reference_rgb = imread('Data/SkateBoard/IMG0_009.png');
+
+n_frames = 2;
+frames_rgb = cell(1, n_frames);
+frames_rgb{1} = imread('Data/SkateBoard/IMG0_003.png');
+frames_rgb{2} = imread('Data/SkateBoard/IMG0_004.png');
+
+base = sum(double(base_rgb), 3) / 3 / 255;
+reference = sum(double(reference_rbg), 3) / 3 / 255;
+
+frames = cell(1, n_frames);
+for i=1:n_frames
+    frames{i} = sum(double(frames_rgb{i}), 3) / 3 / 255;
+end
+
+% show images
+figure;
+subplot(1,2,1); imshow(base_rgb); axis image; title('Base image');
+subplot(1,2,2); imshow(reference_rgb); axis image; title('Reference image');
+
+% Compute SIFT keypoints
+[points_base, desc_base] = sift(base, 'Threshold', 0.015); % Do not change this threshold!
+points_base = [points_base(1:2, :); ones(1, length(points_base))];
+
+[points_reference, desc_reference] = sift(reference, 'Threshold', 0.015);
+points_reference = [points_reference(1:2, :); ones(1, length(points_reference))];
+
+keypoints = cell(2, n_frames);
+for i=1:n_frames
+    [keypoints{1, i}, keypoints{2, i}] = sift(frames{i}, 'Threshold', 0.015); % Do not change this threshold!
+    keypoints{1, i} = [keypoints{1, i}(1:2, :); ones(1, length(keypoints{1, i}))];
+end
+
+matches_base_reference = siftmatch(desc_base, desc_reference);
+
+matches = cell(1, n_frames);
+for i=1:n_frames
+    matches{i} = siftmatch(desc_base, keypoints{2, i});
+end
+
+fundamental_matrices = cell(2, n_frames);
+for i=1:n_frames
+    [fundamental_matrices{1, i}, fundamental_matrices{2, i}] = ...
+            ransac_fundamental_matrix(points_base(:, matches{i}(1, :)), ...
+                                      keypoints{1, i}(:, matches{i}(2, :)), ...
+                                      @geometric_error, 2, 2000); 
+end
+                                             
+% Obtain the point indices representing the van
+indices = zeros(1 + n_frames, length(points_base));
+
+idx_skate_base = 1:10; % given data
+indices(1, :) = ismember(1:length(points_base), matches_base_reference(1, :));
+
+for i=1:n_frames
+    indices(1+i, :) = ismember(1:length(points_base), matches{i}(1, :));
+end
+
+shared_indices = find(sum(indices) == 1 + n_frames);
+
+% 142 is good
+idx_base = 142; % given data
+idx_reference = matches_base_reference(2, matches_base_reference(1, :) == idx_base);
+
+idx = cell(1, n_frames);
+for i=1:n_frames
+    idx{i} = matches{i}(2, matches{i}(1, :) == idx_base);
+end
+
+% Calculate the trajectory of the van
+point1_1 = points_base(:, idx_base);
+point1_2 = points_reference(:, idx_reference);
+l1 = cross(point1_1, point1_2);
+
+% Plot the line
+figure;imshow(base);
+hold on;
+t=1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(point1_1(1), point1_1(2), 'y*');
+
+colors = ['c', 'b', 'g'];
+for i=1:n_frames
+    % Calculate the epipolar line
+    point = keypoints{1, i}(1:3, idx{i});
+    l = fundamental_matrices{1, i}' * point;
+    plot(t, -(l(1)*t + l(3)) / l(2), colors(i));
+
+    % Calculate the projection in the first image
+    pi = cross(l1, l);
+    plot(pi(1)/pi(3), pi(2)/pi(3), strcat(colors(i), '*'));
+end
