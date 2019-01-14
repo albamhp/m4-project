@@ -30,9 +30,14 @@ E = tx * R;
 F_gt = E;
 
 % Evaluation: these two matrices should be very similar
-A1 = F_gt / norm(F_gt);
-A2 = F_es / norm(F_es);
+A1 = F_gt / norm(F_gt)
+A2 = F_es / norm(F_es)
 
+%since obained matrix is up to scale and can be multiplied by -1
+if (A1(1,1) ~= A2(1,1))
+    A2 = -A2
+end
+    
 disp("Cocient between estimated and real fundamental matrices: ")
 disp(A1./A2)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
