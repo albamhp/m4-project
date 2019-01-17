@@ -2,7 +2,7 @@
 %% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Triangulation
@@ -30,14 +30,14 @@ x1_test = euclid(P1 * X_test);
 x2_test = euclid(P2 * X_test);
 
 N_test = size(x1_test,2);
-X_trian = zeros(4,N_test);
+X_train = zeros(4,N_test);
 for i = 1:N_test
-    X_trian(:,i) = triangulate(x1_test(:,i), x2_test(:,i), P1, P2, [2 2]);
+    X_train(:,i) = triangulate(x1_test(:,i), x2_test(:,i), P1, P2, [2 2]);
 end
 
 % error
-euclid(X_test) - euclid(X_trian)
-
+disp("Triangulation error");
+disp(euclid(X_test) - euclid(X_train))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Reconstruction from two views
@@ -93,13 +93,16 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-%E = ...
+E = K' * F * K;
 
 
 % ToDo: write the camera projection matrix for the first camera
-%P1 = ...
+P1 = eye(3,4);
 
 % ToDo: write the four possible matrices for the second camera
+
+[S, V, D] = svd(E);
+
 Pc2 = {};
 %Pc2{1} = ...
 %Pc2{2} = ...
