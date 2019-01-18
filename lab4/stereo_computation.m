@@ -12,7 +12,6 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
             best_win = 0;
             
             winLeft = leftImage(i-winHalf:i+winHalf,j-winHalf:j+winHalf);
-            disp([num2str(i), ' ', num2str(j)]);
             for win=-maxDisp:maxDisp
                 if j + win - winHalf <= 0 || j + win + winHalf > n || abs(win) < minDisp
                    continue; 
