@@ -108,6 +108,8 @@ R2 = {};
 R2{1} = U*W*V';
 R2{2} = U*W'*V';
 
+t = U(:, 3);
+
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
 % Let R be a rotation matrix, you may check:
@@ -121,30 +123,26 @@ for i= 1:2
     end
 end
 
-Pc2{1} = [R2{1} U(:, 3)];
-Pc2{2} = [R2{1} -U(:, 3)];
-Pc2{3} = [R2{2} U(:, 3)];
-Pc2{4} = [R2{2} -U(:, 3)];
+Pc2{1} = [R2{1} t];
+Pc2{2} = [R2{1} -t];
+Pc2{3} = [R2{2} t];
+Pc2{4} = [R2{2} -t];
 
 % plot the first camera and the four possible solutions for the second
 figure;
-plot_camera(P1,1,h/w);
-plot_camera(Pc2{1},1,h/w);
-plot_camera(Pc2{2},1,h/w);
-plot_camera(Pc2{3},1,h/w);
-plot_camera(Pc2{4},1,h/w);
+plot_camera(P1, 1, h/w);
+plot_camera(Pc2{1}, 1, h/w);
+plot_camera(Pc2{2}, 1, h/w);
+plot_camera(Pc2{3}, 1, h/w);
+plot_camera(Pc2{4}, 1, h/w);
 
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-t1 = P1(:,4);
-v1 = P1(:, 3);
 
-for i=1:4
-    t2 = Pc2{i}(:,4);
-    v2 = Pc2{i}(:, 3);
-    
-    X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
+for i=1:4    
+    X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w, h]);
+    scatter3(X3D(1), X3D(3), -X3D(2), 5^2, [1 0 0], 'filled');
     
     X3D_P1 = P1 * X3D;
     X3D_P2 = Pc2{i} * X3D;
@@ -168,8 +166,8 @@ g = interp2(double(Irgb{1}(:,:,2)), x1(1,:), x1(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1(1,:), x1(2,:));
 Xe = euclid(X);
 figure; hold on;
-plot_camera(P1,w,h);
-plot_camera(P2,w,h);
+plot_camera(P1, 1, h/w);
+plot_camera(P2, 1, h/w);
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(3,i), -Xe(2,i), 5^2, [r(i) g(i) b(i)]/255, 'filled');
 end
@@ -180,14 +178,9 @@ axis equal;
 
 % ToDo: compute the reprojection errors
 %       plot the histogram of reprojection errors, and
-%       plot the mean reprojection error
-xp1 = P1.*X;
-error1 = gs_errfunction(P1, x1, xp1);
+%       plot the mean reprojection err
 
-xp2 = P2.*X;
-error2 = gs_errfunction(P2, x2, xp2);
-
-reproj_error = error1 + error2;
+reproj_error = reprojection_error(P1, P2, X, homog(x1), homog(x2));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
 

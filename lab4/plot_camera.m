@@ -4,13 +4,13 @@ function plot_camera( P, w, h, scale )
 if nargin == 3, scale = 1; end
 
 o = optical_center(P);
-p1 = o + view_direction(P, [0 0]) * scale;
-p2 = o + view_direction(P, [w 0]) * scale;
-p3 = o + view_direction(P, [w h]) * scale;
-p4 = o + view_direction(P, [0 h]) * scale;
+p1 = o + view_direction(P, [-w/2 -h/2]) * scale;
+p2 = o + view_direction(P, [w/2 -h/2]) * scale;
+p3 = o + view_direction(P, [w/2 h/2]) * scale;
+p4 = o + view_direction(P, [-w/2 h/2]) * scale;
 
-vgg_scatter_plot([o,p1],'b');
 hold on;
+vgg_scatter_plot([o,p1],'b');
 vgg_scatter_plot([o,p2],'b');
 vgg_scatter_plot([o,p3],'b');
 vgg_scatter_plot([o,p4],'b');
