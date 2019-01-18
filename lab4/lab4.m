@@ -36,7 +36,7 @@ for i = 1:N_test
 end
 
 % error
-disp("Triangulation error");
+disp('Triangulation error');
 disp(euclid(X_test) - euclid(X_train))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,8 +81,6 @@ x2 = points{2}(:, inlier_matches(2, :));
 %vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
-
-
 %% Compute candidate camera matrices.
 
 % Camera calibration matrix
@@ -94,20 +92,21 @@ K = H * K;
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
 E = K' * F * K;
-
+[U, D, V] = svd(E);
+D(3,3) = 0;
+E = U*D*V';
 
 % ToDo: write the camera projection matrix for the first camera
 P1 = eye(3,4);
 
 % ToDo: write the four possible matrices for the second camera
 
-[S, V, D] = svd(E);
-
+[U, D, V] = svd(E);
+W = [0 -1 0; 1 0 0; 0 0 1];
 Pc2 = {};
-%Pc2{1} = ...
-%Pc2{2} = ...
-%Pc2{3} = ...
-%Pc2{4} = ...
+R2 = {};
+R2{1} = U*W*V';
+R2{2} = U*W'*V';
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -116,18 +115,43 @@ Pc2 = {};
 %     R = -R;
 % end
 
+for i= 1:2
+    if det(R2{i}) < 0
+        R2{i} = -R2{i};
+    end
+end
+
+Pc2{1} = [R2{1} U(:, 3)];
+Pc2{2} = [R2{1} -U(:, 3)];
+Pc2{3} = [R2{2} U(:, 3)];
+Pc2{4} = [R2{2} -U(:, 3)];
+
 % plot the first camera and the four possible solutions for the second
 figure;
-plot_camera(P1,w,h);
-plot_camera(Pc2{1},w,h);
-plot_camera(Pc2{2},w,h);
-plot_camera(Pc2{3},w,h);
-plot_camera(Pc2{4},w,h);
+plot_camera(P1,1,h/w);
+plot_camera(Pc2{1},1,h/w);
+plot_camera(Pc2{2},1,h/w);
+plot_camera(Pc2{3},1,h/w);
+plot_camera(Pc2{4},1,h/w);
 
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-%P2 = ...
+t1 = P1(:,4);
+v1 = P1(:, 3);
+
+for i=1:4
+    t2 = Pc2{i}(:,4);
+    v2 = Pc2{i}(:, 3);
+    
+    X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
+    
+    X3D_P1 = P1 * X3D;
+    X3D_P2 = Pc2{i} * X3D;
+    if X3D_P1(3) > 0 && X3D_P2(3) > 0
+       P2 = Pc2{i}; 
+    end
+end
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -157,7 +181,13 @@ axis equal;
 % ToDo: compute the reprojection errors
 %       plot the histogram of reprojection errors, and
 %       plot the mean reprojection error
+xp1 = P1.*X;
+error1 = gs_errfunction(P1, x1, xp1);
 
+xp2 = P2.*X;
+error2 = gs_errfunction(P2, x2, xp2);
+
+reproj_error = error1 + error2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
 
@@ -248,6 +278,19 @@ end
 % the same regularization term you used in module 2. 
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
+
+I1 = mean(double(imread('Data/0001_rectified_s.png'))/256, 3);
+I2 = mean(double(imread('Data/0002_rectified_s.png'))/256, 3);
+
+[points1, descr1] = sift(I1, 'Threshold', 0.01);
+[points2, descr2] = sift(I2, 'Threshold', 0.01);
+
+matches = siftmatch(descr1, descr2);
+
+plotmatches(I1, I2, points1, points2, matches, 'Stacking', 'v');
+
+[F, inliers] = ransac_fundamental_matrix(points1(:, matches(1, :)), ...
+                                         points2(:, matches(2, :)), 2.0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping
