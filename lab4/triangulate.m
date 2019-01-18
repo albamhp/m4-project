@@ -10,13 +10,13 @@ function [pts3D] = triangulate(x1, x2, P1, P2, imsize)
 %           - imsize is a two-dimensional vector with the image size
 
     npts=size(x1, 2);
-    pts3D=zeros(3, npts);
+    pts3D=zeros(4, npts);
 
-    H1=[2/imsize(1, 1) 0 -1
-        0 2/imsize(2, 1) -1
+    H1=[2/imsize(1) 0 -1
+        0 2/imsize(2) -1
         0 0 1];
-    H2=[2/imsize(1, 2) 0 -1
-        0 2/imsize(2, 2) -1
+    H2=[2/imsize(1) 0 -1
+        0 2/imsize(2) -1
         0 0 1];
      
     % left multiply Ps and points
@@ -30,7 +30,7 @@ function [pts3D] = triangulate(x1, x2, P1, P2, imsize)
         A=[nx1(:,i)*nP1(3,:)-nP1(1:2,:); nx2(:,i)*nP2(3,:)-nP2(1:2,:)];
         % Linear-Eigen
         [~, ~, V]=svd(A, 0);
-        pts3D(:,i)=V(1:3, 4)./V(4, 4);
+        pts3D(:,i)=V(1:4, 4) ./ V(4, 4);
     end
 
 end
