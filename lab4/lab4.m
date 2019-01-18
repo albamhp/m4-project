@@ -184,8 +184,19 @@ axis equal;
 % Note 1: Use grayscale images
 % Note 2: For this first set of images use 0 as minimum disparity 
 % and 16 as the the maximum one.
+leftImage = imread('scene1.row3.col3.ppm');
+rightImage = imread('scene1.row3.col4.ppm');
+winSizes = [3, 9, 20, 30];
+maxDisp = 16;
+minDisp = 0;
+for indx_winSize = 1 : length(winSizes)
+    winSize = winSizes(indx_winSize);
+    disp('Start SSD windows size: '+ winSize)
 
-
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
+    figure
+    plot(dist)
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Depth map computation with local methods (NCC)
 
@@ -194,6 +205,16 @@ axis equal;
 %
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
+
+leftImage = imread('scene1.row3.col3.ppm');
+rightImage = imread('scene1.row3.col4.ppm');
+winSizes = [3, 9, 20, 30];
+maxDis = 16;
+minDis = 0;
+for indx_winSize = 1 : length(winSizes)
+    winSize = winSizes(indx_winSize);
+    stereo_computation(leftImage, rightImage, minDis, maxDis, winSize, 'NCC')
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Depth map computation with local methods
