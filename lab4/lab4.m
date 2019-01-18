@@ -36,7 +36,7 @@ for i = 1:N_test
 end
 
 % error
-disp("Triangulation error");
+disp('Triangulation error');
 disp(euclid(X_test) - euclid(X_train))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -182,7 +182,13 @@ axis equal;
 % ToDo: compute the reprojection errors
 %       plot the histogram of reprojection errors, and
 %       plot the mean reprojection error
+xp1 = P1.*X;
+error1 = gs_errfunction(P1, x1, xp1);
 
+xp2 = P2.*X;
+error2 = gs_errfunction(P2, x2, xp2);
+
+reproj_error = error1 + error2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
 
