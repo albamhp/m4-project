@@ -81,8 +81,6 @@ x2 = points{2}(:, inlier_matches(2, :));
 %vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
-
-
 %% Compute candidate camera matrices.
 
 % Camera calibration matrix
@@ -94,20 +92,21 @@ K = H * K;
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
 E = K' * F * K;
-
+[U, D, V] = svd(E);
+D(3,3) = 0;
+E = U*D*V';
 
 % ToDo: write the camera projection matrix for the first camera
 P1 = eye(3,4);
 
 % ToDo: write the four possible matrices for the second camera
 
-[S, V, D] = svd(E);
-
+[U, D, V] = svd(E);
+W = [0 -1 0; 1 0 0; 0 0 1];
 Pc2 = {};
-%Pc2{1} = ...
-%Pc2{2} = ...
-%Pc2{3} = ...
-%Pc2{4} = ...
+R2 = {};
+R2{1} = U*W*V';
+R2{2} = U*W'*V';
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -116,18 +115,44 @@ Pc2 = {};
 %     R = -R;
 % end
 
+for i= 1:2
+    if det(R2{i}) < 0
+        R2{i} = -R2{i};
+    end
+end
+
+Pc2{1} = [R2{1} U(:, 3)]
+Pc2{2} = [R2{1} -U(:, 3)]
+Pc2{3} = [R2{2} U(:, 3)]
+Pc2{4} = [R2{2} -U(:, 3)]
+
 % plot the first camera and the four possible solutions for the second
 figure;
-plot_camera(P1,w,h);
-plot_camera(Pc2{1},w,h);
-plot_camera(Pc2{2},w,h);
-plot_camera(Pc2{3},w,h);
-plot_camera(Pc2{4},w,h);
+plot_camera(P1,1,h/w);
+plot_camera(Pc2{1},1,h/w);
+plot_camera(Pc2{2},1,h/w);
+plot_camera(Pc2{3},1,h/w);
+plot_camera(Pc2{4},1,h/w);
 
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-%P2 = ...
+t1 = P1(:,4);
+v1 = P1(:, 3);
+
+for i=1:4
+
+    t2 = Pc2{i}(:,4);
+    v2 = Pc2{i}(:, 3);
+    
+    X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
+    
+    v1_2 = X3d - t1;
+    v2_2 = X3d - t2;
+    
+    angle =  acos(dot(v1,v1_2))
+    
+end
 
 % Triangulate all matches.
 N = size(x1,2);
