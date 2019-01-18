@@ -1,4 +1,4 @@
-function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
+function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th, ite)
 
 [Ncoords, Npoints] = size(x1);
 
@@ -7,7 +7,7 @@ max_it = 1000;
 best_inliers = [];
 % probability that at least one random sample set is free of outliers
 p = 0.999; 
-while it < max_it
+while it < ite
     
     points = randomsample(Npoints, 8);
     F = fundamental_matrix(x1(:,points), x2(:,points));
@@ -20,11 +20,11 @@ while it < max_it
     
     % update estimate of max_it (the number of trials) to ensure we pick, 
     % with probability p, an initial data set with no outliers
-    fracinliers =  length(best_inliers) / Npoints;
-    pNoOutliers = 1 - fracinliers^8;
-    pNoOutliers = max(eps, pNoOutliers);   % avoid division by -Inf
-    pNoOutliers = min(1-eps, pNoOutliers); % avoid division by 0
-    max_it = min(max_it, log(1-p)/log(pNoOutliers));
+%     fracinliers =  length(best_inliers) / Npoints;
+%     pNoOutliers = 1 - fracinliers^8;
+%     pNoOutliers = max(eps, pNoOutliers);   % avoid division by -Inf
+%     pNoOutliers = min(1-eps, pNoOutliers); % avoid division by 0
+%     max_it = min(max_it, log(1-p)/log(pNoOutliers));
     
     it = it + 1;
 

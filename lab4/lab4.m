@@ -30,10 +30,7 @@ x1_test = euclid(P1 * X_test);
 x2_test = euclid(P2 * X_test);
 
 N_test = size(x1_test,2);
-X_train = zeros(4,N_test);
-for i = 1:N_test
-    X_train(:,i) = triangulate(x1_test(:,i), x2_test(:,i), P1, P2, [2 2]);
-end
+X_train = triangulate(x1_test, x2_test, P1, P2, [2 2]);
 
 % error
 disp('Triangulation error');
@@ -68,7 +65,7 @@ plotmatches(I{1}, I{2}, points{1}, points{2}, matches, 'Stacking', 'v');
 %% Fit Fundamental matrix and remove outliers.
 x1 = points{1}(:, matches(1, :));
 x2 = points{2}(:, matches(2, :));
-[F, inliers] = ransac_fundamental_matrix(homog(x1), homog(x2), 2.0);
+[F, inliers] = ransac_fundamental_matrix(homog(x1), homog(x2), 0.1, 200);
 
 % Plot inliers.
 inlier_matches = matches(:, inliers);
@@ -97,7 +94,7 @@ D(3,3) = 0;
 E = U*D*V';
 
 % ToDo: write the camera projection matrix for the first camera
-P1 = eye(3,4);
+P1 = K * eye(3,4);
 
 % ToDo: write the four possible matrices for the second camera
 
@@ -123,55 +120,53 @@ for i= 1:2
     end
 end
 
-Pc2{1} = [R2{1} t];
-Pc2{2} = [R2{1} -t];
-Pc2{3} = [R2{2} t];
-Pc2{4} = [R2{2} -t];
+Pc2{1} = K * [R2{1} t];
+Pc2{2} = K * [R2{1} -t];
+Pc2{3} = K * [R2{2} t];
+Pc2{4} = K * [R2{2} -t];
 
 % plot the first camera and the four possible solutions for the second
 figure;
-plot_camera(P1, 1, h/w);
-plot_camera(Pc2{1}, 1, h/w);
-plot_camera(Pc2{2}, 1, h/w);
-plot_camera(Pc2{3}, 1, h/w);
-plot_camera(Pc2{4}, 1, h/w);
-
+plot_camera(P1, w, h);
+plot_camera(Pc2{1}, w, h);
+plot_camera(Pc2{2}, w, h);
+plot_camera(Pc2{3}, w, h);
+plot_camera(Pc2{4}, w, h);  
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
 
+best_triangulations = 0;
+
 for i=1:4    
-    X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w, h]);
-    scatter3(X3D(1), X3D(3), -X3D(2), 5^2, [1 0 0], 'filled');
+    X3D = triangulate(x1(:,1:10), x2(:,1:10), K*P1, K*Pc2{i}, [w, h]);
     
     X3D_P1 = P1 * X3D;
     X3D_P2 = Pc2{i} * X3D;
-    if X3D_P1(3) > 0 && X3D_P2(3) > 0
-       P2 = Pc2{i}; 
+    good_triangulations = sum(X3D_P1(3, :) > 0) + sum(X3D_P2(3, :) > 0);
+    if good_triangulations > best_triangulations
+        best_triangulations = good_triangulations;
+        P2 = Pc2{i}; 
     end
 end
 
+figure;
+plot_camera(P1, w, h);
+plot_camera(P2, w, h);
+
 % Triangulate all matches.
 N = size(x1,2);
-X = zeros(4,N);
-for i = 1:N
-    X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
-end
-
-
+X = triangulate(x1, x2, P1, P2, [w, h]);
 
 %% Plot with colors
 r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1(1,:), x1(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1(1,:), x1(2,:));
-Xe = euclid(X);
 figure; hold on;
-plot_camera(P1, 1, h/w);
-plot_camera(P2, 1, h/w);
-for i = 1:length(Xe)
-    scatter3(Xe(1,i), Xe(3,i), -Xe(2,i), 5^2, [r(i) g(i) b(i)]/255, 'filled');
-end
-axis equal;
+plot_camera(P1, w, h);
+plot_camera(P2, w, h);
+scatter3(X(1,:), X(3,:), -X(2,:).*0, 5^2, [r' g' b']./255, 'filled');
+axis equal; 
 
 
 %% Compute reprojection error.
@@ -181,6 +176,11 @@ axis equal;
 %       plot the mean reprojection err
 
 reproj_error = reprojection_error(P1, P2, X, homog(x1), homog(x2));
+
+figure;
+histogram(reproj_error);
+
+disp(['Mean projection error: ', num2str(mean(reproj_error))]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
 
