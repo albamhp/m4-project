@@ -216,16 +216,16 @@ reproj_error = error1 + error2;
 % and 16 as the the maximum one.
 leftImage = imread('scene1.row3.col3.ppm');
 rightImage = imread('scene1.row3.col4.ppm');
-winSizes = [3, 9, 20, 30];
+groundTruth = imread('truedisp.row3.col3.pgm');
+imshow(groundTruth)
+winSizes = [19,29];
 maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
-    disp('Start SSD windows size: '+ winSize)
-
     dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
     figure
-    plot(dist)
+    imshow(dist, [])
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Depth map computation with local methods (NCC)
