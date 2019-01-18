@@ -121,10 +121,10 @@ for i= 1:2
     end
 end
 
-Pc2{1} = [R2{1} U(:, 3)]
-Pc2{2} = [R2{1} -U(:, 3)]
-Pc2{3} = [R2{2} U(:, 3)]
-Pc2{4} = [R2{2} -U(:, 3)]
+Pc2{1} = [R2{1} U(:, 3)];
+Pc2{2} = [R2{1} -U(:, 3)];
+Pc2{3} = [R2{2} U(:, 3)];
+Pc2{4} = [R2{2} -U(:, 3)];
 
 % plot the first camera and the four possible solutions for the second
 figure;
@@ -141,17 +141,16 @@ t1 = P1(:,4);
 v1 = P1(:, 3);
 
 for i=1:4
-
     t2 = Pc2{i}(:,4);
     v2 = Pc2{i}(:, 3);
     
     X3D = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
     
-    v1_2 = X3d - t1;
-    v2_2 = X3d - t2;
-    
-    angle =  acos(dot(v1,v1_2))
-    
+    X3D_P1 = P1 * X3D;
+    X3D_P2 = Pc2{i} * X3D;
+    if X3D_P1(3) > 0 && X3D_P2(3) > 0
+       P2 = Pc2{i}; 
+    end
 end
 
 % Triangulate all matches.
@@ -258,6 +257,19 @@ reproj_error = error1 + error2;
 % the same regularization term you used in module 2. 
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
+
+I1 = mean(double(imread('Data/0001_rectified_s.png'))/256, 3);
+I2 = mean(double(imread('Data/0002_rectified_s.png'))/256, 3);
+
+[points1, descr1] = sift(I1, 'Threshold', 0.01);
+[points2, descr2] = sift(I2, 'Threshold', 0.01);
+
+matches = siftmatch(descr1, descr2);
+
+plotmatches(I1, I2, points1, points2, matches, 'Stacking', 'v');
+
+[F, inliers] = ransac_fundamental_matrix(points1(:, matches(1, :)), ...
+                                         points2(:, matches(2, :)), 2.0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping
