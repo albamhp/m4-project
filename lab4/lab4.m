@@ -139,7 +139,7 @@ plot_camera(Pc2{4}, w, h);
 best_triangulations = 0;
 
 for i=1:4    
-    X3D = triangulate(x1(:,1:10), x2(:,1:10), K*P1, K*Pc2{i}, [w, h]);
+    X3D = triangulate(x1(:,1:10), x2(:,1:10), P1, Pc2{i}, [w, h]);
     
     X3D_P1 = P1 * X3D;
     X3D_P2 = Pc2{i} * X3D;
