@@ -207,6 +207,7 @@ disp(['Mean projection error: ', num2str(mean(reproj_error))]);
 % Note 1: Use grayscale images
 % Note 2: For this first set of images use 0 as minimum disparity 
 % and 16 as the the maximum one.
+
 leftImage = imread('Data/scene1.row3.col3.ppm');
 rightImage = imread('Data/scene1.row3.col4.ppm');
 groundTruth = imread('Data/truedisp.row3.col3.pgm');
