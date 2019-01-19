@@ -183,7 +183,7 @@ histogram(reproj_error);
 disp(['Mean projection error: ', num2str(mean(reproj_error))]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
-
+close all;
 % Data images: 'scene1.row3.col3.ppm','scene1.row3.col4.ppm'
 % Disparity ground truth: 'truedisp.row3.col3.pgm'
 
@@ -243,6 +243,7 @@ imshow(groundTruth);
 winSizes = [3, 9, 19, 29];
 maxDisp = 16;
 minDisp = 0;
+
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
     dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC');
@@ -254,13 +255,27 @@ end
 %% 5. Depth map computation with local methods
 
 % Data images: '0001_rectified_s.png','0002_rectified_s.png'
+leftImage = imread('Data/0001_rectified_s.png');
+rightImage = imread('Data/0002_rectified_s.png');
 
 % Test the functions implemented in the previous section with the facade
 % images. Try different matching costs and window sizes and comment the
 % results.
 % Notice that in this new data the minimum and maximum disparities may
 % change.
-
+close all
+winSizes = {[3, 9] [3, 9]};
+maxDisp = {60 60};
+minDisp = {0 10};
+costFunction = {'SSD' 'NCC'};
+for i = 1:2
+    for indx_winSize = 1:length(winSizes{i})
+        winSize = winSizes{i};
+        dist = stereo_computation(leftImage, rightImage, minDisp{i}, maxDisp{i}, winSize(indx_winSize), costFunction{i});
+        figure;
+        imshow(dist, []);
+    end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. Bilateral weights
 
