@@ -265,8 +265,8 @@ rightImage = imread('Data/0002_rectified_s.png');
 % change.
 close all
 winSizes = {[3, 9] [3, 9]};
-maxDisp = {60 60};
-minDisp = {0 10};
+maxDisp = {20 60};
+minDisp = {5 5};
 costFunction = {'SSD' 'NCC'};
 for i = 1:2
     for indx_winSize = 1:length(winSizes{i})
