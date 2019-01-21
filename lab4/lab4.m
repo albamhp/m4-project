@@ -362,6 +362,7 @@ imshow(im_icm,[]);
 
 se = strel('rectangle',[5, 5]);
 im_icm_op = imopen(im_icm, se);
+im_icm_op = imclose(im_icm_op, se);
 
 figure;
 imshow(im_icm_op,[]);
