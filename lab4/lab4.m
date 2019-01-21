@@ -316,7 +316,7 @@ end
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
 
-addpath(genpath('NCC'));
+addpath(genpath('UGM'));
 
 rightImage = imread('Data/scene1.row3.col3.ppm');
 leftImage = imread('Data/scene1.row3.col4.ppm');
@@ -326,31 +326,34 @@ maxDisp = 16;
 winSize = 19;
 dist = stereo_computation_costs(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC');
 
-[w, h, K] = size(dist);
+[h, w, K] = size(dist);
+halfSide = floor(winSize/2);
 
-halfSide = int32(winSize/2)-1;
-nodePot = dist(halfSide+1:w-halfSide, halfSide+1:h-halfSide, :);
-nodePot = reshape(nodePot, [(w-winSize+1)*(h-winSize+1), K]);
+h_start = halfSide+1;
+h_end = h-halfSide;
+h_trim = h_end - h_start + 1;
 
-for i=1:(w-winSize-1)*(h-winSize-1)
-    if max(nodePot(i, :)) == 0
-        nodePot(i, 1) = 1;
-    else
-        nodePot(i, :) = nodePot(i, :) - min(nodePot(i, :));
-        nodePot(i, :) = nodePot(i, :) ./ sum(nodePot(i, :));
-        nodePot(i, :) = 1 - nodePot(i, :);
-        nodePot(i, :) = nodePot(i, :) ./ sum(nodePot(i, :));
-    end
+w_start = halfSide+1 - minDisp;
+w_end = w-halfSide-maxDisp;
+w_trim = w_end - w_start + 1;
+
+nodePot = dist(h_start:h_end, w_start:w_end, :);
+nodePot = reshape(nodePot, [w_trim*h_trim, K]);
+nodePot(:, :) = -nodePot(:, :);
+
+for i=1:w_trim*h_trim
+    nodePot(i, :) = nodePot(i, :) - min(nodePot(i, :));
 end
+
 smooth_term=[0.0 1]; % Potts Mode
 
 disp('create UGM model');
-[edgePot,edgeStruct] = CreateGridUGMModel(w-winSize+1, h-winSize+1, K, smooth_term);
+[edgePot,edgeStruct] = CreateGridUGMModel(h_trim, w_trim, K, smooth_term);
 
 disp('ICM');
 tic;
 decodeICM = UGM_Decode_ICM(nodePot,edgePot,edgeStruct);
-im_icm= reshape(decodeICM, [w-winSize+1, h-winSize+1]);
+im_icm= reshape(decodeICM, [h_trim, w_trim]);
 toc;
 
 figure;
