@@ -341,10 +341,6 @@ nodePot = dist(h_start:h_end, w_start:w_end, :);
 nodePot = reshape(nodePot, [w_trim*h_trim, K]);
 nodePot(:, :) = -nodePot(:, :);
 
-for i=1:w_trim*h_trim
-    nodePot(i, :) = nodePot(i, :) - min(nodePot(i, :));
-end
-
 smooth_term=[0.0 1]; % Potts Mode
 
 disp('create UGM model');
