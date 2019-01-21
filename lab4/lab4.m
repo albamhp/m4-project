@@ -298,18 +298,52 @@ end
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
 
+addpath('UGM');
+
+
 I1 = mean(double(imread('Data/0001_rectified_s.png'))/256, 3);
 I2 = mean(double(imread('Data/0002_rectified_s.png'))/256, 3);
 
-[points1, descr1] = sift(I1, 'Threshold', 0.01);
-[points2, descr2] = sift(I2, 'Threshold', 0.01);
+minDisp = 0;
+maxDisp = 16;
+winSize = [9 9];
+dist = stereo_computation(I1, I2, minDisp, maxDisp, winSize, 'SSD');
+figure;
+imshow(dist, []);
 
-matches = siftmatch(descr1, descr2);
+K=maxDisp - minDisp;
+smooth_term=[0.0 2]; % Potts Model
+nodePot=[];
+disp('create UGM model');
 
-plotmatches(I1, I2, points1, points2, matches, 'Stacking', 'v');
+[edgePot,edgeStruct] = CreateGridUGMModel(NumFils, NumCols, K ,smooth_term);
 
-[F, inliers] = ransac_fundamental_matrix(points1(:, matches(1, :)), ...
-                                         points2(:, matches(2, :)), 2.0);
+ % color clustering
+[~,c] = min(reshape(data_term,[NumFils*NumCols K]),[],2);
+im_c= reshape(mu_color(c,:),size(im));
+
+% Call different UGM inference algorithms
+display('Loopy Belief Propagation'); tic;
+[nodeBelLBP,edgeBelLBP,logZLBP] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct);toc;
+im_lbp = max(nodeBelLBP,[],2);
+
+% Max-sum
+display('Max-sum'); tic;
+decodeLBP = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
+im_bp= reshape(mu_color(decodeLBP,:),size(im));
+toc;
+
+
+% TODO: apply other inference algorithms and compare their performance
+%
+% - Graph Cut
+% - Linear Programing Relaxation
+
+figure
+subplot(2,2,1),imshow(Lab2RGB(im));xlabel('Original');
+subplot(2,2,2),imshow(Lab2RGB(im_c),[]);xlabel('Clustering without GM');
+subplot(2,2,3),imshow(Lab2RGB(im_bp),[]);xlabel('Max-Sum');
+subplot(2,2,4),imshow(Lab2RGB(im_lbp),[]);xlabel('Loopy Belief Propagation');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping
