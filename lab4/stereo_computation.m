@@ -11,6 +11,8 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
             bestCost = inf;
             best_win = 0;
             
+            disp([num2str(i), ' ', num2str(j)]);
+            
             winLeft = double(leftImage(i-winHalf:i+winHalf,j-winHalf:j+winHalf));
             for win=minDisp:maxDisp
                 if j + win - winHalf <= 0 || j + win + winHalf > n
@@ -18,16 +20,16 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                 end
                 
                 winRight = double(rightImage(i-winHalf:i+winHalf,j+win-winHalf:j+win+winHalf));
-                w = ones(winSize);
+                w = ones([winSize, winSize]);
                 if (weights==1)
-                    for indexQ=1:winSize^2
-                        [ip, jp] = ind2sub(winSize^2, indexQ);
-                        p = winLeft(winHalf+1,winHalf+1);
-                        q = winRight(indexQ);
-                        w(indexQ) = exp(double(-(abs(p-q)/12)-(abs(sqrt((i-ip)^2+(j-jp)^2))/17.5)));
+                    for ip=1:winSize
+                        for jp=1:winSize
+                            p = winLeft(winHalf+1,winHalf+1);
+                            q = winRight(ip, jp);
+                            w(ip, jp) = exp(double(-(abs(p-q)/12)-(abs(sqrt((i-ip)^2+(j-jp)^2))/17.5)));
+                        end
                     end
                 end
-
                 
                 if strcmp('SSD', cost_function)
                     cost = sum(w.*(abs(winLeft(:) - winRight(:))).^2 );
