@@ -300,7 +300,7 @@ maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
-    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC', 1);
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD', 1);
     figure;
     imshow(dist, []);
 end

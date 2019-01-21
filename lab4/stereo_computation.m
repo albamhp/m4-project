@@ -26,15 +26,16 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                         for jp=1:winSize
                             p = winLeft(winHalf+1,winHalf+1);
                             q = winRight(ip, jp);
-                            w(ip, jp) = exp(double(-(abs(p-q)/12)-(abs(sqrt((i-ip)^2+(j-jp)^2))/17.5)));
+                            w(ip, jp) = exp(double(-((abs(q-p)/12)+...
+                                (abs(sqrt((ip-i)^2+(jp-j)^2))/17))));
                         end
                     end
                 end
                 
                 if strcmp('SSD', cost_function)
-                    cost = sum(w.*(abs(winLeft(:) - winRight(:))).^2 );
+                    cost = sum(sum(w.*(abs(winLeft - winRight)).^2 ));
                 elseif strcmp('SAD', cost_function)
-                    cost = sum(w.*abs(winLeft(:) - winRight(:)));
+                    cost = sum(sum(w.*abs(winLeft - winRight)));
                 elseif strcmp('NCC', cost_function)
                     i1 = winLeft-mean2(w.*winLeft);
                     i2 = winRight-mean2(w.*winRight);
