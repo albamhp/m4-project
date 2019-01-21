@@ -34,9 +34,11 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                 elseif strcmp('SAD', cost_function)
                     cost = sum(abs(winLeft(:) - winRight(:)));
                 elseif strcmp('NCC', cost_function)
-                    i1 = winLeft-mean2(winLeft);
-                    i2 = winRight-mean2(winRight);
-                    cost = -sum(i1.*i2)/(sqrt(sum(i1.^2)).*sqrt(sum(i2.^2)));
+                    i1 = winLeft-mean2(w.*winLeft);
+                    i2 = winRight-mean2(w.*winRight);
+                    cost = -sum(w.*i1.*i2)/...
+                        (sqrt(sum(w.*(i1.^2))).*...
+                        sqrt(sum(w.*(i2.^2))));
                         
                 else
                     error('Invalid cost function')
