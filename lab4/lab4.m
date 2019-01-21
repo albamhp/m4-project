@@ -298,18 +298,43 @@ end
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
 
-I1 = mean(double(imread('Data/0001_rectified_s.png'))/256, 3);
-I2 = mean(double(imread('Data/0002_rectified_s.png'))/256, 3);
+addpath(genpath('UGM'));
 
-[points1, descr1] = sift(I1, 'Threshold', 0.01);
-[points2, descr2] = sift(I2, 'Threshold', 0.01);
+leftImage = imread('Data/scene1.row3.col3.ppm');
+rightImage = imread('Data/scene1.row3.col4.ppm');
 
-matches = siftmatch(descr1, descr2);
+minDisp = 0;
+maxDisp = 16;
+winSize = 29;
+dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
 
-plotmatches(I1, I2, points1, points2, matches, 'Stacking', 'v');
+figure;
+imshow(dist, []);
 
-[F, inliers] = ransac_fundamental_matrix(points1(:, matches(1, :)), ...
-                                         points2(:, matches(2, :)), 2.0);
+[w, h] = size(dist);
+
+indices = dist(:) - minDisp + 1;
+indices = sub2ind([w*h, K], 1:w*h, indices');
+
+confidence = 0.8;
+
+K=maxDisp - minDisp + 1;
+smooth_term=[0.0 1]; % Potts Mode
+nodePot=ones(w*h, K) .* 1 / ((confidence * (K-1)) / (1 - confidence) + K-1);
+nodePot(indices) = confidence;
+
+disp('create UGM model');
+[edgePot,edgeStruct] = CreateGridUGMModel(w, h, K , smooth_term);
+
+disp('ICM');
+tic;
+decodeICM = UGM_Decode_ICM(nodePot,edgePot,edgeStruct);
+im_icm= reshape(decodeICM, [w, h]);
+toc;
+
+
+figure;
+imshow(im_icm,[]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping
