@@ -1,8 +1,8 @@
 function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, cost_function)
 
     leftImage = rgb2gray(leftImage);
-    rightImage=rgb2gray(rightImage);
-    [m,n]=size(leftImage);
+    rightImage = rgb2gray(rightImage);
+    [m,n] = size(leftImage);
     dist = zeros(m,n);
     winHalf = floor(winSize/2);
 
