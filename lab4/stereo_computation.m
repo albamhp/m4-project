@@ -18,9 +18,14 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                 end
                 winRight = rightImage(i-winHalf:i+winHalf,j+win-winHalf:j+win+winHalf);
                 if strcmp('SSD', cost_function)
-                    cost = sum( (winLeft(:) - winRight(:)).^2 );
-                elseif strcmp('NCC', cost_function)
+                    cost = sum((abs(winLeft(:) - winRight(:))).^2 );
+                elseif strcmp('SAD', cost_function)
                     cost = sum(abs(winLeft(:) - winRight(:)));
+                elseif strcmp('NCC', cost_function)
+                    i1 = winLeft-mean2(winLeft);
+                    i2 = winRight-mean2(winRight);
+                    cost = sum(i1.*i2)/(sqrt(sum(i1.^2)).*sqrt(sum(i2.^2)));
+                        
                 else
                     error('Invalid cost function')
                 end

@@ -215,12 +215,12 @@ groundTruth = imread('Data/truedisp.row3.col3.pgm');
 figure;
 imshow(groundTruth);
 
-winSizes = [3, 9, 19, 29];
+winSizes = [3, 9, 19, 29, 35];
 maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
-    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SAD');
     figure;
     imshow(dist, []);
 end
