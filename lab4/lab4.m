@@ -298,52 +298,43 @@ end
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
 
-addpath('UGM');
+addpath(genpath('UGM'));
 
-
-I1 = mean(double(imread('Data/0001_rectified_s.png'))/256, 3);
-I2 = mean(double(imread('Data/0002_rectified_s.png'))/256, 3);
+leftImage = imread('Data/scene1.row3.col3.ppm');
+rightImage = imread('Data/scene1.row3.col4.ppm');
 
 minDisp = 0;
 maxDisp = 16;
-winSize = [9 9];
-dist = stereo_computation(I1, I2, minDisp, maxDisp, winSize, 'SSD');
+winSize = 29;
+dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
+
 figure;
 imshow(dist, []);
 
-K=maxDisp - minDisp;
-smooth_term=[0.0 2]; % Potts Model
-nodePot=[];
+[w, h] = size(dist);
+
+indices = dist(:) - minDisp + 1;
+indices = sub2ind([w*h, K], 1:w*h, indices');
+
+confidence = 0.8;
+
+K=maxDisp - minDisp + 1;
+smooth_term=[0.0 1]; % Potts Mode
+nodePot=ones(w*h, K) .* 1 / ((confidence * (K-1)) / (1 - confidence) + K-1);
+nodePot(indices) = confidence;
+
 disp('create UGM model');
+[edgePot,edgeStruct] = CreateGridUGMModel(w, h, K , smooth_term);
 
-[edgePot,edgeStruct] = CreateGridUGMModel(NumFils, NumCols, K ,smooth_term);
-
- % color clustering
-[~,c] = min(reshape(data_term,[NumFils*NumCols K]),[],2);
-im_c= reshape(mu_color(c,:),size(im));
-
-% Call different UGM inference algorithms
-display('Loopy Belief Propagation'); tic;
-[nodeBelLBP,edgeBelLBP,logZLBP] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct);toc;
-im_lbp = max(nodeBelLBP,[],2);
-
-% Max-sum
-display('Max-sum'); tic;
-decodeLBP = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
-im_bp= reshape(mu_color(decodeLBP,:),size(im));
+disp('ICM');
+tic;
+decodeICM = UGM_Decode_ICM(nodePot,edgePot,edgeStruct);
+im_icm= reshape(decodeICM, [w, h]);
 toc;
 
 
-% TODO: apply other inference algorithms and compare their performance
-%
-% - Graph Cut
-% - Linear Programing Relaxation
-
-figure
-subplot(2,2,1),imshow(Lab2RGB(im));xlabel('Original');
-subplot(2,2,2),imshow(Lab2RGB(im_c),[]);xlabel('Clustering without GM');
-subplot(2,2,3),imshow(Lab2RGB(im_bp),[]);xlabel('Max-Sum');
-subplot(2,2,4),imshow(Lab2RGB(im_lbp),[]);xlabel('Loopy Belief Propagation');
+figure;
+imshow(im_icm,[]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping

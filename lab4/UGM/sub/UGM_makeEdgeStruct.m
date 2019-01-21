@@ -5,7 +5,7 @@ function [edgeStruct] = UGM_makeEdgeStruct(adj,nStates,useMex,maxIter)
 %
 
 if nargin < 3
-    useMex = 1;
+    useMex = 0;
 end
 if nargin < 4
     maxIter = 100;
