@@ -38,7 +38,6 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                     i2 = winRight-mean2(winRight);
                     corr = sum(sum(i1.*i2))/(sqrt(sum(sum(i1.^2))).*sqrt(sum(sum(i2.^2))));
                     cost = -corr;
-
                 else
                     error('Invalid cost function')
                 end

@@ -288,14 +288,14 @@ end
 % Note: Use grayscale images (the paper uses color images)
 
 
-leftImage = imread('Data/scene1.row3.col3.ppm');
-rightImage = imread('Data/scene1.row3.col4.ppm');
+rightImage = imread('Data/scene1.row3.col3.ppm');
+leftImage = imread('Data/scene1.row3.col4.ppm');
 groundTruth = imread('Data/truedisp.row3.col3.pgm');
 
 figure;
 imshow(groundTruth);
 
-winSizes = [3, 9, 19, 29, 35];
+winSizes = [3];
 maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
@@ -323,8 +323,12 @@ leftImage = imread('Data/scene1.row3.col4.ppm');
 
 minDisp = 0;
 maxDisp = 16;
-winSize = 19;
+winSize = 15;
+
+disp('Initializing stereo values')
+tic;
 dist = stereo_computation_costs(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC');
+toc;
 
 [h, w, K] = size(dist);
 halfSide = floor(winSize/2);
@@ -340,6 +344,7 @@ w_trim = w_end - w_start + 1;
 nodePot = dist(h_start:h_end, w_start:w_end, :);
 nodePot = reshape(nodePot, [w_trim*h_trim, K]);
 nodePot(:, :) = -nodePot(:, :);
+nodePot(nodePot < 0) = 0.001;
 
 smooth_term=[0.0 1]; % Potts Mode
 
@@ -354,6 +359,12 @@ toc;
 
 figure;
 imshow(im_icm,[]);
+
+se = strel('rectangle',[5, 5]);
+im_icm_op = imopen(im_icm, se);
+
+figure;
+imshow(im_icm_op,[]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Depth computation with Plane Sweeping
