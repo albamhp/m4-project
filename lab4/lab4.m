@@ -220,7 +220,7 @@ maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
-    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SAD');
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SAD', 0);
     figure;
     imshow(dist, []);
 end
@@ -246,7 +246,7 @@ minDisp = 0;
 
 for indx_winSize = 1 : length(winSizes)
     winSize = winSizes(indx_winSize);
-    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC');
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC', 0);
     figure;
     imshow(dist, []);
 end
@@ -271,7 +271,7 @@ costFunction = {'SSD' 'NCC'};
 for i = 1:2
     for indx_winSize = 1:length(winSizes{i})
         winSize = winSizes{i};
-        dist = stereo_computation(leftImage, rightImage, minDisp{i}, maxDisp{i}, winSize(indx_winSize), costFunction{i});
+        dist = stereo_computation(leftImage, rightImage, minDisp{i}, maxDisp{i}, winSize(indx_winSize), costFunction{i}, 0);
         figure;
         imshow(dist, []);
     end
@@ -286,6 +286,24 @@ end
 % Comment the results and compare them to the previous results (no weights).
 %
 % Note: Use grayscale images (the paper uses color images)
+
+
+leftImage = imread('Data/scene1.row3.col3.ppm');
+rightImage = imread('Data/scene1.row3.col4.ppm');
+groundTruth = imread('Data/truedisp.row3.col3.pgm');
+
+figure;
+imshow(groundTruth);
+
+winSizes = [3, 9, 19, 29, 35];
+maxDisp = 16;
+minDisp = 0;
+for indx_winSize = 1 : length(winSizes)
+    winSize = winSizes(indx_winSize);
+    dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SAD', 1);
+    figure;
+    imshow(dist, []);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Stereo computation with Belief Propagation
