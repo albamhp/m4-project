@@ -208,14 +208,14 @@ close all;
 % Note 2: For this first set of images use 0 as minimum disparity 
 % and 16 as the the maximum one.
 
-leftImage = imread('Data/scene1.row3.col3.ppm');
-rightImage = imread('Data/scene1.row3.col4.ppm');
+rightImage = imread('Data/scene1.row3.col3.ppm');
+leftImage = imread('Data/scene1.row3.col4.ppm');
 groundTruth = imread('Data/truedisp.row3.col3.pgm');
 
 figure;
 imshow(groundTruth);
 
-winSizes = [3, 9, 19, 29, 35];
+winSizes = [3, 9, 19, 29];
 maxDisp = 16;
 minDisp = 0;
 for indx_winSize = 1 : length(winSizes)
@@ -233,8 +233,8 @@ end
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
-leftImage = imread('Data/scene1.row3.col3.ppm');
-rightImage = imread('Data/scene1.row3.col4.ppm');
+rightImage = imread('Data/scene1.row3.col3.ppm');
+leftImage = imread('Data/scene1.row3.col4.ppm');
 groundTruth = imread('Data/truedisp.row3.col3.pgm');
 
 figure;
@@ -298,40 +298,42 @@ end
 % Or pick a stereo paper (based on belief propagation) from the literature 
 % and implement it. Pick a simple method or just simplify the method they propose.
 
-addpath(genpath('UGM'));
+addpath(genpath('NCC'));
 
-leftImage = imread('Data/scene1.row3.col3.ppm');
-rightImage = imread('Data/scene1.row3.col4.ppm');
+rightImage = imread('Data/scene1.row3.col3.ppm');
+leftImage = imread('Data/scene1.row3.col4.ppm');
 
 minDisp = 0;
 maxDisp = 16;
-winSize = 29;
-dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, 'SSD');
+winSize = 19;
+dist = stereo_computation_costs(leftImage, rightImage, minDisp, maxDisp, winSize, 'NCC');
 
-figure;
-imshow(dist, []);
+[w, h, K] = size(dist);
 
-[w, h] = size(dist);
+halfSide = int32(winSize/2)-1;
+nodePot = dist(halfSide+1:w-halfSide, halfSide+1:h-halfSide, :);
+nodePot = reshape(nodePot, [(w-winSize+1)*(h-winSize+1), K]);
 
-indices = dist(:) - minDisp + 1;
-indices = sub2ind([w*h, K], 1:w*h, indices');
-
-confidence = 0.8;
-
-K=maxDisp - minDisp + 1;
+for i=1:(w-winSize-1)*(h-winSize-1)
+    if max(nodePot(i, :)) == 0
+        nodePot(i, 1) = 1;
+    else
+        nodePot(i, :) = nodePot(i, :) - min(nodePot(i, :));
+        nodePot(i, :) = nodePot(i, :) ./ sum(nodePot(i, :));
+        nodePot(i, :) = 1 - nodePot(i, :);
+        nodePot(i, :) = nodePot(i, :) ./ sum(nodePot(i, :));
+    end
+end
 smooth_term=[0.0 1]; % Potts Mode
-nodePot=ones(w*h, K) .* 1 / ((confidence * (K-1)) / (1 - confidence) + K-1);
-nodePot(indices) = confidence;
 
 disp('create UGM model');
-[edgePot,edgeStruct] = CreateGridUGMModel(w, h, K , smooth_term);
+[edgePot,edgeStruct] = CreateGridUGMModel(w-winSize+1, h-winSize+1, K, smooth_term);
 
 disp('ICM');
 tic;
 decodeICM = UGM_Decode_ICM(nodePot,edgePot,edgeStruct);
-im_icm= reshape(decodeICM, [w, h]);
+im_icm= reshape(decodeICM, [w-winSize+1, h-winSize+1]);
 toc;
-
 
 figure;
 imshow(im_icm,[]);

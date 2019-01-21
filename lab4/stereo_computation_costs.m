@@ -1,17 +1,16 @@
-function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, cost_function)
+function dist = stereo_computation_costs(leftImage, rightImage, minDisp, maxDisp, winSize, cost_function)
 
     leftImage = int16(rgb2gray(leftImage));
     rightImage = int16(rgb2gray(rightImage));
     [m,n] = size(leftImage);
-    dist = zeros(m,n);
+    dist = ones(m,n, maxDisp - minDisp + 1) .* inf;
     winHalf = floor(winSize/2);
 
     for i=1+winHalf:m-winHalf
         for j=1+winHalf:n-winHalf
-            bestCost = inf;
-            best_win = 0;
-            
+           
             winLeft = leftImage(i-winHalf:i+winHalf,j-winHalf:j+winHalf);
+            cost_i = 1;
             for win=minDisp:maxDisp
                 if j + win - winHalf <= 0 || j + win + winHalf > n
                    continue; 
@@ -28,13 +27,9 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
                 else
                     error('Invalid cost function')
                 end
-
-                if cost < bestCost
-                    best_win = win;
-                    bestCost = cost;
-                end
+                dist(i,j, cost_i) = cost;
+                cost_i = cost_i + 1;
             end
-            dist(i,j) = abs(best_win);
         end    
     end
 end
