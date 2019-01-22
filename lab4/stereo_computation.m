@@ -1,7 +1,7 @@
 function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winSize, cost_function, weights)
 
-    leftImage = int16(rgb2gray(leftImage));
-    rightImage = int16(rgb2gray(rightImage));
+    leftImage = double(rgb2gray(leftImage));
+    rightImage = double(rgb2gray(rightImage));
     [m,n] = size(leftImage);
     dist = zeros(m,n);
     winHalf = floor(winSize/2);
@@ -13,27 +13,31 @@ function dist = stereo_computation(leftImage, rightImage, minDisp, maxDisp, winS
             
             disp([num2str(i), ' ', num2str(j)]);
             
-            winLeft = double(leftImage(i-winHalf:i+winHalf,j-winHalf:j+winHalf));
+            winLeft = leftImage(i-winHalf:i+winHalf,j-winHalf:j+winHalf);
             for win=minDisp:maxDisp
                 if j + win - winHalf <= 0 || j + win + winHalf > n
                    continue; 
                 end
                 
-                winRight = double(rightImage(i-winHalf:i+winHalf,j+win-winHalf:j+win+winHalf));
+                winRight = rightImage(i-winHalf:i+winHalf,j+win-winHalf:j+win+winHalf);
                 w = ones([winSize, winSize]);
                 if (weights==1)
                     for ip=1:winSize
                         for jp=1:winSize
+                            
                             p = winLeft(winHalf+1,winHalf+1);
                             q = winRight(ip, jp);
                             w(ip, jp) = exp(double(-((abs(q-p)/12)+...
-                                (abs(sqrt((ip-i)^2+(jp-j)^2))/17))));
+                                (abs(sqrt((ip-i)^2+(jp-j)^2))/winHalf))));
+                            
                         end
                     end
                 end
                 
                 if strcmp('SSD', cost_function)
                     cost = sum(sum(w.*(abs(winLeft - winRight)).^2 ));
+                    
+                    
                 elseif strcmp('SAD', cost_function)
                     cost = sum(sum(w.*abs(winLeft - winRight)));
                 elseif strcmp('NCC', cost_function)
