@@ -1,4 +1,4 @@
-function [Pproj,Xproj] = factorization_method(x1, x2)
+function [Pproj, Xproj] = factorization_method(x)
 %FACTORIZATION_METHOD computes a projective reconstruction with the 
 % factorization method of Sturm and Triggs '1996
 % This function returns an estimate of:
@@ -8,26 +8,33 @@ function [Pproj,Xproj] = factorization_method(x1, x2)
     
     d_old = 100;
     maxIter = 1000;
-    lambda = ones(2, length(x1));
-    lambdas = kron(lambda, [1 1 1]');
-    [x1, T1] = normalise2dpts(x1);
-    [x2, T2] = normalise2dpts(x2);
+    
+    m = size(x, 1) / 3;
+    n = size(x, 2);
+    
+    lambdas = ones(m, n);
+    
+    
+    H = cell(1, m);
+    for i=1:m
+        r = i*3-2:i*3;
+        [x(r, :), H{i}] = normalise2dpts(x(r, :));
+    end
     
     for iteration = 1:maxIter
-        disp(lambda)
 
         % Create the design matrix M.
-        M = lambdas.*[ x1; x2];
+        lambdas_mat = kron(lambdas, [1 1 1]');
+        M = lambdas_mat.*x;
     
         % Rank 4
-        [U,D,V] = svd(M,0);
-        D = D(1:4,1:4);
-        U = U(:,1:4);
-        V = V(:,1:4)';
+        [U,D,V] = svd(M);
+        D4 = D(1:4,1:4);
+        U4 = U(:,1:4);
+        V4 = V(:,1:4);
         
-        Pproj = U*D;
-        Xproj = V;
-        
+        Pproj = U4*D4;
+        Xproj = V4';
         
         % As a convergence criterion you may compute the Euclidean
         % distance (d) between data points and projected points in both images 
@@ -39,11 +46,13 @@ function [Pproj,Xproj] = factorization_method(x1, x2)
         end
         d_old = d;
         
-        
-        for i= 1:2
-            temp = Pproj((1:3)+(i-1)*3,:)*Xproj;
-            lambda(i,:) = temp(3,:); 
-        end
+        M_rec = Pproj*Xproj;
+        lambdas = M_rec(3:3:3*m, :);
+    end
+    
+    for i=1:m
+        r = i*3-2:i*3;
+        Pproj(r, :) = H{i} \ Pproj(r, :);
     end
 end
 
