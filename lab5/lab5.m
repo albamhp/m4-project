@@ -436,8 +436,8 @@ x_d = cell(1, 2);
 for i=1:2
     x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
 end
-x_d{1} = euclid(P1*Xh);
-x_d{2} = euclid(P2*Xh);
+x_d{1} = x1;
+x_d{2} = x2;
 
 % image 1
 figure;
