@@ -170,7 +170,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % in the previous iteration.
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method([x1; x2]);
+[Pproj, Xproj] = factorization_method([x1; x2], false);
 
 x_proj = cell(1, 2);
 x_d = cell(1, 2);
