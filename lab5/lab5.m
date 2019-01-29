@@ -260,6 +260,7 @@ v1p = vanishing_point(x2(:,21),x2(:,22),x2(:,23),x2(:,24));
 v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
 v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
+
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 V1 = triangulate(v1, v1p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
@@ -267,6 +268,12 @@ V2 = triangulate(v2, v2p, Pproj(1:3,:), Pproj(4:6,:), [w h]);
 V3 = triangulate(v3, v3p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 
 A = [V1';V2';V3'];
+
+[U,D,V] = svd(A,0);
+
+Ha = V(:,4)';
+Ha = Ha(1:3)./Ha(4);
+Hp=[1,0,0,0;0,1,0,0;0,0,1,0;Ha(1),Ha(2),Ha(3),1];
 
 %% check results
 
@@ -320,6 +327,20 @@ axis equal
 v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
+
+A = [v1(1)*v2(1) v1(1)*v2(2)+v1(2)*v2(1) v1(1)*v2(3)+v1(3)*v2(1) v1(2)*v2(2) v1(2)*v2(3)+v1(3)*v2(2) v1(3)*v2(3);
+     v1(1)*v3(1) v1(1)*v3(2)+v1(2)*v3(1) v1(1)*v3(3)+v1(3)*v3(1) v1(2)*v3(2) v1(2)*v3(3)+v1(3)*v3(2) v1(3)*v3(3);
+     v2(1)*v3(1) v2(1)*v3(2)+v2(2)*v3(1) v2(1)*v3(3)+v2(3)*v3(1) v2(2)*v3(2) v2(2)*v3(3)+v2(3)*v3(2) v2(3)*v3(3);
+     0  1   0   0   0   0;
+     1  0   0   -1  0   0];
+[U,D,V] = svd(A);
+w = V(:,end)';
+
+K = chol(inv(w));
+K = K ./ K(3,3);
+
+Ha = [inv(K) zeros(3,1);
+      zeros(1,3) 1];
 
 %% check results
 
