@@ -171,7 +171,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method([x1; x2], true);
+[Pproj, Xproj] = factorization_method([x1; x2], false);
 
 x_proj = cell(1, 2);
 x_d = cell(1, 2);
@@ -534,7 +534,7 @@ figure; hold on;
 [w,h] = size(I{1});
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
-end;
+end
 axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -579,12 +579,17 @@ Ncam = length(I);
 [points_3, desc_3] = sift(I{3}, 'Threshold', 0.01);
 
 %% Match SIFT keypoints between a and b
-matches = siftmatch(desc_1, desc_2);
-matches2 = siftmatch(desc_2, desc_3);
+matches_1_2 = siftmatch(desc_1, desc_2);
+matches_1_3 = siftmatch(desc_1, desc_3);
+s
+P = zeros(3, len(points_1));
+P(1, matches_1_2(1, :)) = matches_1_2(1, :);
+P(1, matches_1_2(1, :)) = matches_1_2(2, :);
+P(1, matches_1_3(1, :)) = matches_1_3(2, :);
 
-% p1 and p2 contain the homogeneous coordinates of the matches
-p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
-p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
+p1 = points_1(:, P(1, :));
+p2 = points_2(:, P(2, :));
+p3 = points_3(:, P(3, :));
 
 % If using @algebraic_error, choose 0.005 as threshold
 [F, inliers] = ransac_fundamental_matrix(p1, p2, 2); 

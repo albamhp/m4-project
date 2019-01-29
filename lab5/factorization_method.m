@@ -11,18 +11,17 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     
     m = size(x, 1) / 3;
     n = size(x, 2);
-    F = eye(3);
-    if lambda_one
-        lambdas = ones(m, n);
-    else
-        for  i= 1:m
+    lambdas = ones(m, n);
+    
+    if ~lambda_one
+        for i=1:m
             r = i*3-2:i*3;
-            if i ==1
+            if i==1
                 F = eye(3);
             else
                 F = fundamental_matrix(x(r,:),x(1:3,:));
             end
-            for j= 1:n
+            for j=1:n
                 e_line = F * x(r,j);
                 lambdas(i,j) = x(1:3,j)'* F(i,1)*e_line/(sum(e_line).^2);
             end
@@ -54,13 +53,13 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         % distance (d) between data points and projected points in both images 
         % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
         % in the previous iteration.
-        d = sqrt(sum(sum((M - (Pproj*Xproj)).^2)));
+        d = sqrt(sum(sum((x - (Pproj*Xproj)).^2)));
         if (abs(d - d_old)/d) < 0.1
             break;
         end
         d_old = d;
         
-        M_rec = Pproj*Xproj;
+        M_rec = x - Pproj*Xproj;
         lambdas = M_rec(3:3:3*m, :);
     end
     
