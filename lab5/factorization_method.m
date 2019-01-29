@@ -1,4 +1,4 @@
-function [Pproj, Xproj] = factorization_method(x)
+function [Pproj, Xproj] = factorization_method(x, lambda_one)
 %FACTORIZATION_METHOD computes a projective reconstruction with the 
 % factorization method of Sturm and Triggs '1996
 % This function returns an estimate of:
@@ -11,9 +11,23 @@ function [Pproj, Xproj] = factorization_method(x)
     
     m = size(x, 1) / 3;
     n = size(x, 2);
-    
-    lambdas = ones(m, n);
-    
+    F = eye(3);
+    if lambda_one
+        lambdas = ones(m, n);
+    else
+        for  i= 1:m
+            r = i*3-2:i*3;
+            if i ==1
+                F = eye(3);
+            else
+                F = fundamental_matrix(x(r,:),x(1:3,:));
+            end
+            for j= 1:n
+                e_line = F * x(r,j);
+                lambdas(i,j) = x(1:3,j)'* F(i,1)*e_line/(sum(e_line).^2);
+            end
+        end
+    end
     
     H = cell(1, m);
     for i=1:m
