@@ -5,7 +5,6 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
 %       Pproj: 3*Ncam x 4 matrix containing the camera matrices
 %       Xproj: 4 x Npoints matrix of homogeneous coordinates of 3D points
 % 
-    
     d_old = 100;
     maxIter = 1000;
     
@@ -54,7 +53,7 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         % distance (d) between data points and projected points in both images 
         % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
         % in the previous iteration.
-        d = sqrt(sum(sum((M - (Pproj*Xproj)).^2)));
+        d = sum(sum((x - (Pproj*Xproj)).^2));
         if (abs(d - d_old)/d) < 0.1
             break;
         end

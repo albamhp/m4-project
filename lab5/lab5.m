@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 5: Reconstruction from uncalibrated viewas
-
+close all
 
 addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
@@ -428,7 +428,7 @@ x2 = p2(:,inliers);
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
 
-[Pproj, Xproj] = factorization_method([x1; x2], t);
+[Pproj, Xproj] = factorization_method([x1; x2], true);
 
 x_proj = cell(1, 2);
 x_d = cell(1, 2);
