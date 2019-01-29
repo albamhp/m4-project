@@ -581,26 +581,27 @@ Ncam = length(I);
 %% Match SIFT keypoints between a and b
 matches_1_2 = siftmatch(desc_1, desc_2);
 matches_1_3 = siftmatch(desc_1, desc_3);
-s
-P = zeros(3, len(points_1));
+
+P = zeros(3, length(points_1));
 P(1, matches_1_2(1, :)) = matches_1_2(1, :);
-P(1, matches_1_2(1, :)) = matches_1_2(2, :);
-P(1, matches_1_3(1, :)) = matches_1_3(2, :);
+P(2, matches_1_2(1, :)) = matches_1_2(2, :);
+P(3, matches_1_3(1, :)) = matches_1_3(2, :);
+
+P = P(:, min(P) > 0);
 
 p1 = points_1(:, P(1, :));
 p2 = points_2(:, P(2, :));
 p3 = points_3(:, P(3, :));
 
 % If using @algebraic_error, choose 0.005 as threshold
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 2); 
+[~, inliers1] = ransac_fundamental_matrix(p1, p2, 2); 
+[~, inliers2] = ransac_fundamental_matrix(p2, p3, 2);
 
-% show inliers
-figure;
-plotmatches(I{1}, I{2}, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
-title('Inliers');
+inliers = intersect(inliers1,inliers2);
 
 x1 = p1(:,inliers);
 x2 = p2(:,inliers);
+x3 = p3(:,inliers);
 
 %% ToDo: compute a projective reconstruction using the factorization method
 
@@ -608,16 +609,18 @@ x2 = p2(:,inliers);
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
 
-[Pproj, Xproj] = factorization_method([x1; x2], t);
+[Pproj, Xproj] = factorization_method([x1; x2; x3], t);
 
-x_proj = cell(1, 2);
-x_d = cell(1, 2);
+x_proj = cell(1, Ncam);
+x_d = cell(1, Ncam);
 
-for i=1:2
+for i=1:Ncam
     x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
 end
-x_d{1} = euclid(P1*Xh);
-x_d{2} = euclid(P2*Xh);
+
+x_d{1} = x1;
+x_d{2} = x2;
+x_d{3} = x3;
 
 % image 1
 figure;
@@ -632,50 +635,13 @@ hold on
 plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
-
-%% Visualize projective reconstruction
-Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
-Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
-Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
-X=Xaux;
-
+% image 3
 figure;
-hold on;
-X1 = X(:,1); X2 = X(:,2); X3 = X(:,3); X4 = X(:,4);
-plot3([X1(1) X2(1)], [X1(2) X2(2)], [X1(3) X2(3)]);
-plot3([X3(1) X4(1)], [X3(2) X4(2)], [X3(3) X4(3)]);
-X5 = X(:,5); X6 = X(:,6); X7 = X2; X8 = X3;
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-X5 = X(:,7); X6 = X(:,8); X7 = X1; X8 = X4;
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-X5 = X(:,9); X6 = X(:,10); X7 = X(:,11); X8 = X(:,12);
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-X5 = X(:,13); X6 = X(:,14); X7 = X(:,15); X8 = X(:,16);
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-X5 = X(:,17); X6 = X(:,18); X7 = X(:,19); X8 = X(:,20);
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-X5 = X(:,21); X6 = X(:,22); X7 = X(:,23); X8 = X(:,24);
-plot3([X5(1) X6(1)], [X5(2) X6(2)], [X5(3) X6(3)]);
-plot3([X7(1) X8(1)], [X7(2) X8(2)], [X7(3) X8(3)]);
-plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
-plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
-axis vis3d
-axis equal
+hold on
+plot(x_d{3}(1,:),x_d{3}(2,:),'r*');
+plot(x_proj{3}(1,:),x_proj{3}(2,:),'bo');
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 9. OPTIONAL: Any other improvement you may incorporate 
