@@ -66,7 +66,7 @@ K = [709 0 450; 0 709 300; 0 0 1];
 Rz = [cos(0.88*pi/2) -sin(0.88*pi/2) 0; sin(0.88*pi/2) cos(0.88*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
 R1 = Rz*Ry;
-t1 = -R1*[40; 10; 5];
+t1 = -R1*[42; 5; 10];
 
 Rz = [cos(0.8*pi/2) -sin(0.8*pi/2) 0; sin(0.8*pi/2) cos(0.8*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
@@ -171,14 +171,17 @@ x2(3,:) = x2(3,:)./x2(3,:);
 
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method([x1; x2], false);
+[Pproj, Xproj] = factorization_method([x1; x2], true);
+
+Pproj_1 = Pproj(1:3, :);
+Pproj_2 = Pproj(4:6, :);
 
 x_proj = cell(1, 2);
 x_d = cell(1, 2);
 
-for i=1:2
-    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
-end
+x_proj{1} = euclid(Pproj_1*Xproj);
+x_proj{2} = euclid(Pproj_2*Xproj);
+
 x_d{1} = euclid(P1*Xh);
 x_d{2} = euclid(P2*Xh);
 
@@ -240,6 +243,8 @@ plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
 
+plot_camera2(P1,w,h);
+plot_camera2(P2,w,h);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -267,9 +272,9 @@ V1 = triangulate(v1, v1p, Pproj(1:3,:), Pproj(4:6,:), [w h]);
 V2 = triangulate(v2, v2p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 V3 = triangulate(v3, v3p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 
-A = [V1';V2';V3'];
+A = [V1'; V2'; V3'];
 
-[U,D,V] = svd(A,0);
+[~, ~, V] = svd(A,0);
 
 Ha = V(:,4)';
 Ha = Ha(1:3)./Ha(4);
