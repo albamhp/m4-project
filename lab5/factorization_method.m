@@ -19,9 +19,13 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     
     lambdas = ones(m, n);
     if ~lambda_one
-        for i=2:m
+        for i=1:m
             r = i*3-2:i*3;
-            F = fundamental_matrix(x(r,:),x(1:3,:));
+            if i==1
+                F = eye(3);
+            else
+                F = fundamental_matrix(x(r,:),x(1:3,:));
+            end
             for j=1:n
                 e_line = F * x(r,j);
                 lambdas(i,j) = x(1:3,j)'* F(i,1)*e_line/(sum(e_line).^2);
@@ -59,8 +63,8 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         U4 = U(:,1:4);
         V4 = V(:,1:4);
         
-        Pproj = U4*sqrt(D4);
-        Xproj = sqrt(D4)*V4';
+        Pproj = U4*D4;
+        Xproj = V4';
         
         % As a convergence criterion you may compute the Euclidean
         % distance (d) between data points and projected points in both images 
@@ -80,19 +84,5 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         r = i*3-2:i*3;
         Pproj(r, :) = H{i} \ Pproj(r, :);
     end
-    
-    % Align the first camera reference system with the world reference
-    % system
-    Xproj = euclid(Xproj);
-    i1 = Pproj(1,1:3)';
-    i1 = i1 / norm(i1);
-    j1 = Pproj(4,1:3)';
-    j1 = j1 / norm(j1);
-    k1 = cross(i1, j1);
-    k1 = k1 / norm(k1);
-    R0 = [i1 j1 k1];
-    Pproj(:,1:3) = Pproj(:,1:3) * R0;
-    Xproj = R0 \ Xproj;
-    Xproj = homog(Xproj);
 end
 

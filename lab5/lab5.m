@@ -243,10 +243,6 @@ plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
 
-plot_camera2(P1,w,h);
-plot_camera2(P2,w,h);
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine reconstruction (synthetic data)
 
@@ -268,9 +264,9 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-V1 = triangulate(v1, v1p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
-V2 = triangulate(v2, v2p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
-V3 = triangulate(v3, v3p, Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V1 = triangulate(v1(1:2, :), v1p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V2 = triangulate(v2(1:2, :), v2p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(v3(1:2, :), v3p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 
 A = [V1'; V2'; V3'];
 
@@ -333,15 +329,24 @@ v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
-A = [v1(1)*v2(1) v1(1)*v2(2)+v1(2)*v2(1) v1(1)*v2(3)+v1(3)*v2(1) v1(2)*v2(2) v1(2)*v2(3)+v1(3)*v2(2) v1(3)*v2(3);
-     v1(1)*v3(1) v1(1)*v3(2)+v1(2)*v3(1) v1(1)*v3(3)+v1(3)*v3(1) v1(2)*v3(2) v1(2)*v3(3)+v1(3)*v3(2) v1(3)*v3(3);
-     v2(1)*v3(1) v2(1)*v3(2)+v2(2)*v3(1) v2(1)*v3(3)+v2(3)*v3(1) v2(2)*v3(2) v2(2)*v3(3)+v2(3)*v3(2) v2(3)*v3(3);
+%v1 = v1 ./ v1(3);
+%v2 = v2 ./ v2(3);
+%v3 = v3 ./ v3(3);
+
+A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3)+v1(3)*v2(2), v1(3)*v2(3);
+     v1(1)*v3(1), v1(1)*v3(2)+v1(2)*v3(1), v1(1)*v3(3)+v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3)+v1(3)*v3(2), v1(3)*v3(3);
+     v2(1)*v3(1), v2(1)*v3(2)+v2(2)*v3(1), v2(1)*v3(3)+v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3)+v2(3)*v3(2), v2(3)*v3(3);
      0  1   0   0   0   0;
      1  0   0   -1  0   0];
-[U,D,V] = svd(A);
-w = V(:,end)';
 
-K = chol(inv(w));
+[~, ~, V] = svd(A, 0);
+
+WV = V(:,end);
+W = [WV(1) WV(2) WV(3);
+     WV(2) WV(4) WV(5);
+     WV(3) WV(5) WV(6)];
+
+K = chol(inv(W));
 K = K ./ K(3,3);
 
 Ha = [inv(K) zeros(3,1);
