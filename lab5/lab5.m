@@ -464,6 +464,7 @@ plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
 
 %% Visualize projective reconstruction
+Xaux = zeros(3, length(Xproj));
 Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
 Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
 Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
@@ -521,6 +522,8 @@ axis equal
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
 
+addpath('lib')
+
 img_in =  'Data/0000_s.png'; % input image
 folder_out = '.'; % output folder
 manhattan = 1;
@@ -528,8 +531,12 @@ acceleration = 0;
 focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
-[horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+% [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
 
+VPs = load('VPs.mat');
+
+v = VPs.VPs_0;
+vp = VPs.VPs_1;
 
 %% Visualize the result
 
