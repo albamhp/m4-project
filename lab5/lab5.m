@@ -171,7 +171,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method([x1; x2], true);
+[Pproj, Xproj] = factorization_method([x1; x2], false);
 
 Pproj_1 = Pproj(1:3, :);
 Pproj_2 = Pproj(4:6, :);

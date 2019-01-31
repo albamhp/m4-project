@@ -19,16 +19,12 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     
     lambdas = ones(m, n);
     if ~lambda_one
-        for i=1:m
+        for i=2:m % image
             r = i*3-2:i*3;
-            if i==1
-                F = eye(3);
-            else
-                F = fundamental_matrix(x(r,:),x(1:3,:));
-            end
-            for j=1:n
-                e_line = F * x(r,j);
-                lambdas(i,j) = x(1:3,j)'* F(i,1)*e_line/(sum(e_line).^2);
+            F = fundamental_matrix(x(r,:), x(1:3,:));
+            for j=1:n % point
+                e_line = F * x(r, j);
+                lambdas(i,j) = (x(1:3,j)'* F * e_line) / norm(e_line)^2;
             end
         end
     end
