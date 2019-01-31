@@ -266,7 +266,11 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 %       upgrades the projective reconstruction to an affine reconstruction
 V1 = triangulate(v1(1:2, :), v1p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 V2 = triangulate(v2(1:2, :), v2p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
-V3 = triangulate(v3(1:2, :), v3p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(v3(1:2, :), v3p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]);
+
+V1 = V1 ./ (V1(4));
+V2 = V2 ./ (V2(4));
+V3 = V3 ./ (V3(4));
 
 A = [V1'; V2'; V3'];
 
@@ -274,7 +278,7 @@ A = [V1'; V2'; V3'];
 
 Ha = V(:,4)';
 Ha = Ha(1:3)./Ha(4);
-Hp=[1,0,0,0;0,1,0,0;0,0,1,0;Ha(1),Ha(2),Ha(3),1];
+Hp=[eye(3), zeros(3, 1); Ha, 1];
 
 %% check results
 
@@ -438,7 +442,7 @@ x2 = p2(:,inliers);
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
 
-[Pproj, Xproj] = factorization_method([x1; x2], true);
+[Pproj, Xproj] = factorization_method([x1; x2], false);
 
 x_proj = cell(1, 2);
 x_d = cell(1, 2);
@@ -522,8 +526,6 @@ axis equal
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
 
-addpath('lib')
-
 img_in =  'Data/0000_s.png'; % input image
 folder_out = '.'; % output folder
 manhattan = 1;
@@ -538,10 +540,32 @@ VPs = load('VPs.mat');
 v = VPs.VPs_0;
 vp = VPs.VPs_1;
 
+
+% ToDo: use the vanishing points to compute the matrix Hp that 
+%       upgrades the projective reconstruction to an affine reconstruction
+V1 = triangulate(v(1:2, 1), vp(1:2, 1), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V2 = triangulate(v(1:2, 2), vp(1:2, 2), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(v(1:2, 3), vp(1:2, 3), Pproj(1:3,:), Pproj(4:6,:), [w h]);
+
+V1 = V1 ./ (V1(4));
+V2 = V2 ./ (V2(4));
+V3 = V3 ./ (V3(4));
+
+A = [V1'; V2'; V3'];
+
+[~, ~, V] = svd(A,0);
+
+Ha = V(:,4)';
+Ha = Ha(1:3)./Ha(4);
+Hp=[eye(3), zeros(3, 1); Ha, 1];
+
 %% Visualize the result
 
 % x1m are the data points in image 1
 % Xm are the reconstructed 3D points (projective reconstruction)
+
+x1m = x_proj{1};
+Xm = Xproj;
 
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
@@ -549,9 +573,7 @@ b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = euclid(Hp*Xm);
 figure; hold on;
 [w,h] = size(I{1});
-for i = 1:length(Xe)
-    scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
-end
+scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
 axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -559,6 +581,43 @@ axis equal;
 
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
+
+v1 = homog(v(:, 1));
+v2 = homog(v(:, 2));
+v3 = homog(v(:, 3));
+
+A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3)+v1(3)*v2(2), v1(3)*v2(3);
+     v1(1)*v3(1), v1(1)*v3(2)+v1(2)*v3(1), v1(1)*v3(3)+v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3)+v1(3)*v3(2), v1(3)*v3(3);
+     v2(1)*v3(1), v2(1)*v3(2)+v2(2)*v3(1), v2(1)*v3(3)+v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3)+v2(3)*v3(2), v2(3)*v3(3);
+     0  1   0   0   0   0;
+     1  0   0   -1  0   0];
+
+[~, ~, V] = svd(A, 0);
+
+WV = V(:,end);
+W = [WV(1) WV(2) WV(3);
+     WV(2) WV(4) WV(5);
+     WV(3) WV(5) WV(6)];
+
+K = chol(inv(W));
+K = K ./ K(3,3);
+
+Ha = [K zeros(3,1);
+      zeros(1,3) 1];
+  
+%% check results
+
+x1m = x_proj{1};
+Xm = Xproj;
+
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = euclid(Ha*Hp*Xm);
+figure; hold on;
+[w,h] = size(I{1});
+scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
+axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views

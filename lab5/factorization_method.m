@@ -32,22 +32,22 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     for iteration = 1:1
         old_change = inf;
         old_lambdas = lambdas;
-        for ite=1:maxIter
-            if mod(ite, 2) == 1
-                row_norms = 1./vecnorm(lambdas')';
-                lambdas = lambdas .* kron(row_norms, ones(1, n));
-            else
-                column_norms = 1./vecnorm(lambdas);
-                lambdas = lambdas .* kron(column_norms, ones(m, 1));
-            end
-
-            change = sum(sum(abs(lambdas - old_lambdas)));
-            if abs(change - old_change) < 0.1
-                break
-            end
-            old_lambdas = lambdas;
-            old_change = change;
-        end
+%         for ite=1:maxIter
+%             if mod(ite, 2) == 1
+%                 row_norms = 1./vecnorm(lambdas')';
+%                 lambdas = lambdas .* kron(row_norms, ones(1, n));
+%             else
+%                 column_norms = 1./vecnorm(lambdas);
+%                 lambdas = lambdas .* kron(column_norms, ones(m, 1));
+%             end
+% 
+%             change = sum(sum(abs(lambdas - old_lambdas)));
+%             if abs(change - old_change) < 0.1
+%                 break
+%             end
+%             old_lambdas = lambdas;
+%             old_change = change;
+%         end
 
         % Create the design matrix M.
         lambdas_mat = kron(lambdas, [1 1 1]');
