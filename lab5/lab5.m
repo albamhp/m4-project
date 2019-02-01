@@ -627,6 +627,52 @@ axis equal;
 % and one of the epipoles.
 % Then update the reconstruction to affine and metric as before (reuse the code).
 
+
+%% read images
+Irgb{1} = double(imread('Data/0000_s.png'))/255;
+Irgb{2} = double(imread('Data/0001_s.png'))/255;
+
+I{1} = sum(Irgb{1}, 3) / 3; 
+I{2} = sum(Irgb{2}, 3) / 3;
+
+Ncam = length(I);
+
+%% Compute SIFT keypoints
+
+% (make sure that the sift folder provided in lab2 is on the path)
+
+[points_1, desc_1] = sift(I{1}, 'Threshold', 0.01);
+[points_2, desc_2] = sift(I{2}, 'Threshold', 0.01);
+
+%% Match SIFT keypoints between a and b
+matches = siftmatch(desc_1, desc_2);
+figure;
+plotmatches(I{1}, I{2}, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', 'v');
+
+% p1 and p2 contain the homogeneous coordinates of the matches
+p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
+p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
+
+% If using @algebraic_error, choose 0.005 as threshold
+[F, inliers] = ransac_fundamental_matrix(p1, p2, 2); 
+
+% show inliers
+figure;
+plotmatches(I{1}, I{2}, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
+title('Inliers');
+
+x1 = p1(:,inliers);
+x2 = p2(:,inliers);
+
+[~, ~, V] = svd(F',0);
+e = V(:,3);
+
+ex = [0 -e(3) e(2) ; e(3) 0 -e(1) ; -e(2) e(1) 0];
+
+P1 = [eye(3), zeros(3,1)];
+P2 = [ex*F, e];
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 8. OPTIONAL: Projective reconstruction from more than two views
 
