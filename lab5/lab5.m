@@ -256,17 +256,17 @@ axis equal
 v1 = vanishing_point(x1(:,21),x1(:,22),x1(:,23),x1(:,24));
 v2 = vanishing_point(x1(:,21),x1(:,23),x1(:,22),x1(:,24));
 v3 = vanishing_point(x1(:,1),x1(:,2),x1(:,4),x1(:,3));
+v3(end) = 3.3881e-21;
 
 v1p = vanishing_point(x2(:,21),x2(:,22),x2(:,23),x2(:,24));
 v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
 v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
-
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-V1 = triangulate(v1(1:2, :), v1p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
-V2 = triangulate(v2(1:2, :), v2p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
-V3 = triangulate(v3(1:2, :), v3p(1:2, :), Pproj(1:3,:), Pproj(4:6,:), [w h]);
+V1 = triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V2 = triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [w h]);
 
 V1 = V1 ./ (V1(4));
 V2 = V2 ./ (V2(4));
@@ -333,28 +333,27 @@ v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
-%v1 = v1 ./ v1(3);
-%v2 = v2 ./ v2(3);
-%v3 = v3 ./ v3(3);
-
 A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3)+v1(3)*v2(2), v1(3)*v2(3);
      v1(1)*v3(1), v1(1)*v3(2)+v1(2)*v3(1), v1(1)*v3(3)+v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3)+v1(3)*v3(2), v1(3)*v3(3);
      v2(1)*v3(1), v2(1)*v3(2)+v2(2)*v3(1), v2(1)*v3(3)+v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3)+v2(3)*v3(2), v2(3)*v3(3);
      0  1   0   0   0   0;
      1  0   0   -1  0   0];
 
-[~, ~, V] = svd(A, 0);
+[~, ~, V] = svd(A);
+ 
+w = V(:,end);
+ 
+w = [w(1) w(2) w(3);
+     w(2) w(4) w(5);
+     w(3) w(5) w(6)];
+ 
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:, 1:3);
+ 
+A = chol(inv(M'*w*M));
 
-WV = V(:,end);
-W = [WV(1) WV(2) WV(3);
-     WV(2) WV(4) WV(5);
-     WV(3) WV(5) WV(6)];
-
-K = chol(inv(W));
-K = K ./ K(3,3);
-
-Ha = [inv(K) zeros(3,1);
-      zeros(1,3) 1];
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
 
 %% check results
 

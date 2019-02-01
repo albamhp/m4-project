@@ -19,11 +19,13 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     
     lambdas = ones(m, n);
     if ~lambda_one
-        for i=2:m % image
+        for i=1:m % image
             r = i*3-2:i*3;
             F = fundamental_matrix(x(r,:), x(1:3,:));
+            [~, ~, V] = svd(F);
+            e = V(:,3) / V(3,3);
             for j=1:n % point
-                e_line = F * x(r, j);
+                e_line = cross(e, x(r,j));
                 lambdas(i,j) = (x(1:3,j)'* F * e_line) / norm(e_line)^2;
             end
         end
@@ -32,29 +34,29 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     for iteration = 1:1
         old_change = inf;
         old_lambdas = lambdas;
-%         for ite=1:maxIter
-%             if mod(ite, 2) == 1
-%                 row_norms = 1./vecnorm(lambdas')';
-%                 lambdas = lambdas .* kron(row_norms, ones(1, n));
-%             else
-%                 column_norms = 1./vecnorm(lambdas);
-%                 lambdas = lambdas .* kron(column_norms, ones(m, 1));
-%             end
-% 
-%             change = sum(sum(abs(lambdas - old_lambdas)));
-%             if abs(change - old_change) < 0.1
-%                 break
-%             end
-%             old_lambdas = lambdas;
-%             old_change = change;
-%         end
+        for ite=1:maxIter
+            if mod(ite, 2) == 1
+                row_norms = 1./vecnorm(lambdas')';
+                lambdas = lambdas .* kron(row_norms, ones(1, n));
+            else
+                column_norms = 1./vecnorm(lambdas);
+                lambdas = lambdas .* kron(column_norms, ones(m, 1));
+            end
+
+            change = sum(sum(abs(lambdas - old_lambdas)));
+            if abs(change - old_change) < 0.1
+                break
+            end
+            old_lambdas = lambdas;
+            old_change = change;
+        end
 
         % Create the design matrix M.
         lambdas_mat = kron(lambdas, [1 1 1]');
         M = lambdas_mat.*x;
     
         % Rank 4
-        [U,D,V] = svd(M, 0);
+        [U, D, V] = svd(M, 0);
         D4 = D(1:4,1:4);
         U4 = U(:,1:4);
         V4 = V(:,1:4);
