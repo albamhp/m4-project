@@ -19,7 +19,7 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
     
     lambdas = ones(m, n);
     if ~lambda_one
-        for i=1:m % image
+        for i=2:m % image
             r = i*3-2:i*3;
             F = fundamental_matrix(x(r,:), x(1:3,:));
             [~, ~, V] = svd(F);
@@ -31,7 +31,7 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         end
     end
     
-    for iteration = 1:1
+    for iteration = 1:maxIter
         old_change = inf;
         old_lambdas = lambdas;
         for ite=1:maxIter

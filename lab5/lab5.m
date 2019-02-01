@@ -699,7 +699,47 @@ Ha = V(:,4)';
 Ha = Ha(1:3)./Ha(4);
 Hp=[eye(3), zeros(3, 1); Ha, 1];
 
+%% Metric
 
+v1 = homog(v(:, 1));
+v2 = homog(v(:, 2));
+v3 = homog(v(:, 3));
+
+A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3)+v1(3)*v2(2), v1(3)*v2(3);
+     v1(1)*v3(1), v1(1)*v3(2)+v1(2)*v3(1), v1(1)*v3(3)+v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3)+v1(3)*v3(2), v1(3)*v3(3);
+     v2(1)*v3(1), v2(1)*v3(2)+v2(2)*v3(1), v2(1)*v3(3)+v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3)+v2(3)*v3(2), v2(3)*v3(3);
+     0  1   0   0   0   0;
+     1  0   0   -1  0   0];
+
+[~, ~, V] = svd(A);
+ 
+W = V(:,end);
+ 
+W = [W(1) W(2) W(3);
+     W(2) W(4) W(5);
+     W(3) W(5) W(6)];
+ 
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:, 1:3);
+ 
+A = chol(inv(M'*W*M));
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
+  
+%% check results
+
+x1m = x_proj{1};
+Xm = Xproj;
+
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = -euclid(Ha*Hp*Xm);
+figure; hold on;
+[w,h] = size(I{1});
+scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
+axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 8. OPTIONAL: Projective reconstruction from more than two views
@@ -728,6 +768,10 @@ Ncam = length(I);
 [points_2, desc_2] = sift(I{2}, 'Threshold', 0.01);
 [points_3, desc_3] = sift(I{3}, 'Threshold', 0.01);
 
+points_1 = points_1(1:2, :);
+points_2 = points_2(1:2, :);
+points_3 = points_3(1:2, :);
+
 %% Match SIFT keypoints between a and b
 matches_1_2 = siftmatch(desc_1, desc_2);
 matches_1_3 = siftmatch(desc_1, desc_3);
@@ -739,15 +783,15 @@ P(3, matches_1_3(1, :)) = matches_1_3(2, :);
 
 P = P(:, min(P) > 0);
 
-p1 = points_1(:, P(1, :));
-p2 = points_2(:, P(2, :));
-p3 = points_3(:, P(3, :));
+p1 = homog(points_1(:, P(1, :)));
+p2 = homog(points_2(:, P(2, :)));
+p3 = homog(points_3(:, P(3, :)));
 
 % If using @algebraic_error, choose 0.005 as threshold
 [~, inliers1] = ransac_fundamental_matrix(p1, p2, 2); 
-[~, inliers2] = ransac_fundamental_matrix(p2, p3, 2);
+[~, inliers2] = ransac_fundamental_matrix(p1, p3, 2);
 
-inliers = intersect(inliers1,inliers2);
+inliers = intersect(inliers1, inliers2);
 
 x1 = p1(:,inliers);
 x2 = p2(:,inliers);
@@ -759,7 +803,7 @@ x3 = p3(:,inliers);
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
 
-[Pproj, Xproj] = factorization_method([x1; x2; x3], t);
+[Pproj, Xproj] = factorization_method([x1; x2; x3], false);
 
 x_proj = cell(1, Ncam);
 x_d = cell(1, Ncam);
@@ -791,7 +835,70 @@ hold on
 plot(x_d{3}(1,:),x_d{3}(2,:),'r*');
 plot(x_proj{3}(1,:),x_proj{3}(2,:),'bo');
 
+%% Affine
 
+VPs = load('VPs.mat');
+v = VPs.VPs_0;
+vp = VPs.VPs_1;
+
+
+% ToDo: use the vanishing points to compute the matrix Hp that 
+%       upgrades the projective reconstruction to an affine reconstruction
+V1 = triangulate(v(1:2, 1), vp(1:2, 1), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V2 = triangulate(v(1:2, 2), vp(1:2, 2), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(v(1:2, 3), vp(1:2, 3), Pproj(1:3,:), Pproj(4:6,:), [w h]);
+
+V1 = V1 ./ (V1(4));
+V2 = V2 ./ (V2(4));
+V3 = V3 ./ (V3(4));
+
+A = [V1'; V2'; V3'];
+
+[~, ~, V] = svd(A,0);
+
+Ha = V(:,4)';
+Ha = Ha(1:3)./Ha(4);
+Hp=[eye(3), zeros(3, 1); Ha, 1];
+
+v1 = homog(v(:, 1));
+v2 = homog(v(:, 2));
+v3 = homog(v(:, 3));
+
+A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3)+v1(3)*v2(2), v1(3)*v2(3);
+     v1(1)*v3(1), v1(1)*v3(2)+v1(2)*v3(1), v1(1)*v3(3)+v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3)+v1(3)*v3(2), v1(3)*v3(3);
+     v2(1)*v3(1), v2(1)*v3(2)+v2(2)*v3(1), v2(1)*v3(3)+v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3)+v2(3)*v3(2), v2(3)*v3(3);
+     0  1   0   0   0   0;
+     1  0   0   -1  0   0];
+
+[~, ~, V] = svd(A);
+ 
+W = V(:,end);
+ 
+W = [W(1) W(2) W(3);
+     W(2) W(4) W(5);
+     W(3) W(5) W(6)];
+ 
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:, 1:3);
+ 
+A = chol(inv(M'*W*M));
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
+  
+%% check results
+
+x1m = x_proj{1};
+Xm = Xproj;
+
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = -euclid(Ha*Hp*Xm);
+figure; hold on;
+[w,h] = size(I{1});
+scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
+axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 9. OPTIONAL: Any other improvement you may incorporate 
