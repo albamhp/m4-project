@@ -341,16 +341,16 @@ A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2),
 
 [~, ~, V] = svd(A);
  
-w = V(:,end);
+W = V(:,end);
  
-w = [w(1) w(2) w(3);
-     w(2) w(4) w(5);
-     w(3) w(5) w(6)];
+W = [W(1) W(2) W(3);
+     W(2) W(4) W(5);
+     W(3) W(5) W(6)];
  
 P = Pproj(1:3, :)*inv(Hp);
 M = P(:, 1:3);
  
-A = chol(inv(M'*w*M));
+A = chol(inv(M'*W*M));
 
 Ha = eye(4,4);
 Ha(1:3,1:3) = inv(A);
@@ -406,6 +406,8 @@ Irgb{2} = double(imread('Data/0001_s.png'))/255;
 I{1} = sum(Irgb{1}, 3) / 3; 
 I{2} = sum(Irgb{2}, 3) / 3;
 
+[w, h] = size(I{1});
+
 Ncam = length(I);
 
 %% Compute SIFT keypoints
@@ -424,8 +426,7 @@ plotmatches(I{1}, I{2}, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', '
 p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
-% If using @algebraic_error, choose 0.005 as threshold
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 2); 
+[F, inliers] = ransac_fundamental_matrix(p1, p2, 1); 
 
 % show inliers
 figure;
@@ -571,7 +572,6 @@ g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = euclid(Hp*Xm);
 figure; hold on;
-[w,h] = size(I{1});
 scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
 axis equal;
 
@@ -591,18 +591,21 @@ A = [v1(1)*v2(1), v1(1)*v2(2)+v1(2)*v2(1), v1(1)*v2(3)+v1(3)*v2(1), v1(2)*v2(2),
      0  1   0   0   0   0;
      1  0   0   -1  0   0];
 
-[~, ~, V] = svd(A, 0);
+[~, ~, V] = svd(A);
+ 
+W = V(:,end);
+ 
+W = [W(1) W(2) W(3);
+     W(2) W(4) W(5);
+     W(3) W(5) W(6)];
+ 
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:, 1:3);
+ 
+A = chol(inv(M'*W*M));
 
-WV = V(:,end);
-W = [WV(1) WV(2) WV(3);
-     WV(2) WV(4) WV(5);
-     WV(3) WV(5) WV(6)];
-
-K = chol(inv(W));
-K = K ./ K(3,3);
-
-Ha = [K zeros(3,1);
-      zeros(1,3) 1];
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
   
 %% check results
 
@@ -612,7 +615,7 @@ Xm = Xproj;
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
-Xe = euclid(Ha*Hp*Xm);
+Xe = -euclid(Ha*Hp*Xm);
 figure; hold on;
 [w,h] = size(I{1});
 scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
@@ -670,6 +673,32 @@ ex = [0 -e(3) e(2) ; e(3) 0 -e(1) ; -e(2) e(1) 0];
 
 P1 = [eye(3), zeros(3,1)];
 P2 = [ex*F, e];
+
+%% Affine
+
+VPs = load('VPs.mat');
+v = VPs.VPs_0;
+vp = VPs.VPs_1;
+
+
+% ToDo: use the vanishing points to compute the matrix Hp that 
+%       upgrades the projective reconstruction to an affine reconstruction
+V1 = triangulate(v(1:2, 1), vp(1:2, 1), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V2 = triangulate(v(1:2, 2), vp(1:2, 2), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
+V3 = triangulate(v(1:2, 3), vp(1:2, 3), Pproj(1:3,:), Pproj(4:6,:), [w h]);
+
+V1 = V1 ./ (V1(4));
+V2 = V2 ./ (V2(4));
+V3 = V3 ./ (V3(4));
+
+A = [V1'; V2'; V3'];
+
+[~, ~, V] = svd(A,0);
+
+Ha = V(:,4)';
+Ha = Ha(1:3)./Ha(4);
+Hp=[eye(3), zeros(3, 1); Ha, 1];
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
