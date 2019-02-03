@@ -1,6 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 5: Reconstruction from uncalibrated viewas
 close all
+clc
+clear all
 
 addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
@@ -199,6 +201,14 @@ plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
 
+%% Compute reprojection error.
+
+% compute the reprojection errors, plot the mean reprojection err
+
+reproj_error = reprojection_error(Pproj_1, Pproj_2, Xproj, x1, x2);
+
+disp(['Mean projection error: ', num2str(mean(reproj_error))]);
+
 %% Visualize projective reconstruction
 Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
 Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
@@ -355,6 +365,7 @@ A = chol(inv(M'*W*M));
 Ha = eye(4,4);
 Ha(1:3,1:3) = inv(A);
 
+
 %% check results
 
 Xa = euclid(Ha*Hp*Xproj);
@@ -466,6 +477,13 @@ hold on
 plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
+%% Compute reprojection error.
+
+% compute the reprojection errors, plot the mean reprojection err
+
+reproj_error = reprojection_error(Pproj(3-2:3, :), Pproj(3*2-2:3*2, :), Xproj, x1, x2);
+
+disp(['Mean projection error: ', num2str(mean(reproj_error))]);
 
 %% Visualize projective reconstruction
 Xaux = zeros(3, length(Xproj));
@@ -526,14 +544,15 @@ axis equal
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
 
-img_in =  'Data/0000_s.png'; % input image
-folder_out = '.'; % output folder
-manhattan = 1;
-acceleration = 0;
-focal_ratio = 1;
-params.PRINT = 1;
-params.PLOT = 1;
+% img_in =  'Data/0000_s.png'; % input image
+% folder_out = '.'; % output folder
+% manhattan = 1;
+% acceleration = 0;
+% focal_ratio = 1;
+% params.PRINT = 1;
+% params.PLOT = 1;
 % [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+[h w] = size(I{1})
 
 VPs = load('VPs.mat');
 
@@ -570,7 +589,7 @@ Xm = Xproj;
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
-Xe = euclid(Hp*Xm);
+Xe = -euclid(Hp*Xm);
 figure; hold on;
 scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
 axis equal;
