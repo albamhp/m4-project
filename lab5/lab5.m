@@ -652,12 +652,12 @@ axis equal;
 Irgb{1} = double(imread('Data/0000_s.png'))/255;
 Irgb{2} = double(imread('Data/0001_s.png'))/255;
 
+I = cell(1, 2);
 I{1} = sum(Irgb{1}, 3) / 3; 
 I{2} = sum(Irgb{2}, 3) / 3;
 
 [h, w] = size(I{1});
-
-Ncam = length(I);
+Ncam = 2;
 
 %% Compute SIFT keypoints
 
@@ -759,7 +759,6 @@ g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = -euclid(Ha*Hp*Xm);
 figure; hold on;
-[h, w] = size(I{1});
 scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
 axis equal;
 
@@ -776,6 +775,7 @@ Irgb{1} = double(imread('Data/0000_s.png'))/255;
 Irgb{2} = double(imread('Data/0001_s.png'))/255;
 Irgb{3} = double(imread('Data/0002_s.png'))/255;
 
+I = cell(1, 3);
 I{1} = sum(Irgb{1}, 3) / 3; 
 I{2} = sum(Irgb{2}, 3) / 3;
 I{3} = sum(Irgb{3}, 3) / 3;
@@ -940,12 +940,12 @@ I{3} = sum(Irgb{3}, 3) / 3;
 I{4} = sum(Irgb{4}, 3) / 3;
 
 [h, w] = size(I{1});
-Ncam = length(I);
+Ncam = 4;
 
 [points_1, desc_1] = sift(I{1}, 'Threshold', 0.01);
 [points_2, desc_2] = sift(I{2}, 'Threshold', 0.01);
 [points_3, desc_3] = sift(I{3}, 'Threshold', 0.01);
-[points_4, desc_4] = sift(I{3}, 'Threshold', 0.01);
+[points_4, desc_4] = sift(I{4}, 'Threshold', 0.01);
 
 points_1 = points_1(1:2, :);
 points_2 = points_2(1:2, :);
@@ -967,9 +967,8 @@ P = P(:, min(P) > 0);
 p1 = homog(points_1(:, P(1, :)));
 p2 = homog(points_2(:, P(2, :)));
 p3 = homog(points_3(:, P(3, :)));
-p4 = homog(points_4(:, P(3, :)));
+p4 = homog(points_4(:, P(4, :)));
 
-% If using @algebraic_error, choose 0.005 as threshold
 [~, inliers1] = ransac_fundamental_matrix(p1, p2, 2); 
 [~, inliers2] = ransac_fundamental_matrix(p1, p3, 2);
 [~, inliers3] = ransac_fundamental_matrix(p1, p4, 2);
