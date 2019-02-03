@@ -847,8 +847,6 @@ v = VPs.VPs_0;
 vp = VPs.VPs_1;
 
 
-% ToDo: use the vanishing points to compute the matrix Hp that 
-%       upgrades the projective reconstruction to an affine reconstruction
 V1 = triangulate(v(1:2, 1), vp(1:2, 1), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 V2 = triangulate(v(1:2, 2), vp(1:2, 2), Pproj(1:3,:), Pproj(4:6,:), [w h]); 
 V3 = triangulate(v(1:2, 3), vp(1:2, 3), Pproj(1:3,:), Pproj(4:6,:), [w h]);
@@ -884,7 +882,7 @@ W = [W(1) W(2) W(3);
      W(2) W(4) W(5);
      W(3) W(5) W(6)];
  
-P = P1*inv(Hp);
+P = Pproj(1:3, :)*inv(Hp);
 M = P(:, 1:3);
  
 A = chol(inv(M'*W*M));
