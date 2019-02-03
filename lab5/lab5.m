@@ -426,7 +426,7 @@ plotmatches(I{1}, I{2}, points_1(1:2,:), points_2(1:2,:), matches, 'Stacking', '
 p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 1); 
+[~, inliers] = ransac_fundamental_matrix(p1, p2, 1); 
 
 % show inliers
 figure;
