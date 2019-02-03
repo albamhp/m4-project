@@ -1,6 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 5: Reconstruction from uncalibrated viewas
 close all
+clc
+clear all
 
 addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
@@ -199,6 +201,14 @@ plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
 
+%% Compute reprojection error.
+
+% compute the reprojection errors, plot the mean reprojection err
+
+reproj_error = reprojection_error(Pproj_1, Pproj_2, Xproj, x1, x2);
+
+disp(['Mean projection error: ', num2str(mean(reproj_error))]);
+
 %% Visualize projective reconstruction
 Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
 Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
@@ -355,6 +365,7 @@ A = chol(inv(M'*w*M));
 Ha = eye(4,4);
 Ha(1:3,1:3) = inv(A);
 
+
 %% check results
 
 Xa = euclid(Ha*Hp*Xproj);
@@ -465,6 +476,13 @@ hold on
 plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
+%% Compute reprojection error.
+
+% compute the reprojection errors, plot the mean reprojection err
+
+reproj_error = reprojection_error(Pproj(3-2:3, :), Pproj(3*2-2:3*2, :), Xproj, x1, x2);
+
+disp(['Mean projection error: ', num2str(mean(reproj_error))]);
 
 %% Visualize projective reconstruction
 Xaux = zeros(3, length(Xproj));
@@ -525,14 +543,15 @@ axis equal
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
 
-img_in =  'Data/0000_s.png'; % input image
-folder_out = '.'; % output folder
-manhattan = 1;
-acceleration = 0;
-focal_ratio = 1;
-params.PRINT = 1;
-params.PLOT = 1;
+% img_in =  'Data/0000_s.png'; % input image
+% folder_out = '.'; % output folder
+% manhattan = 1;
+% acceleration = 0;
+% focal_ratio = 1;
+% params.PRINT = 1;
+% params.PLOT = 1;
 % [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+[h w] = size(I{1})
 
 VPs = load('VPs.mat');
 
@@ -569,7 +588,7 @@ Xm = Xproj;
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
-Xe = euclid(Hp*Xm);
+Xe = -euclid(Hp*Xm);
 figure; hold on;
 [w,h] = size(I{1});
 scatter3(Xe(1, :), Xe(2, :), Xe(3, :), 2^2, [r' g' b'], 'filled');
@@ -657,26 +676,26 @@ Ncam = length(I);
 matches_1_2 = siftmatch(desc_1, desc_2);
 matches_1_3 = siftmatch(desc_1, desc_3);
 
-P = zeros(3, length(points_1));
-P(1, matches_1_2(1, :)) = matches_1_2(1, :);
-P(2, matches_1_2(1, :)) = matches_1_2(2, :);
-P(3, matches_1_3(1, :)) = matches_1_3(2, :);
-
-P = P(:, min(P) > 0);
-
-p1 = points_1(:, P(1, :));
-p2 = points_2(:, P(2, :));
-p3 = points_3(:, P(3, :));
-
-% If using @algebraic_error, choose 0.005 as threshold
-[~, inliers1] = ransac_fundamental_matrix(p1, p2, 2); 
-[~, inliers2] = ransac_fundamental_matrix(p2, p3, 2);
-
-inliers = intersect(inliers1,inliers2);
-
-x1 = p1(:,inliers);
-x2 = p2(:,inliers);
-x3 = p3(:,inliers);
+% P = zeros(3, length(points_1));
+% P(1, matches_1_2(1, :)) = matches_1_2(1, :);
+% P(2, matches_1_2(1, :)) = matches_1_2(2, :);
+% P(3, matches_1_3(1, :)) = matches_1_3(2, :);
+% 
+% P = P(:, min(P) > 0);
+% 
+% p1 = points_1(:, P(1, :));
+% p2 = points_2(:, P(2, :));
+% p3 = points_3(:, P(3, :));
+% 
+% % If using @algebraic_error, choose 0.005 as threshold
+% [~, inliers1] = ransac_fundamental_matrix(p1, p2, 2); 
+% [~, inliers2] = ransac_fundamental_matrix(p2, p3, 2);
+% 
+% inliers = intersect(inliers1,inliers2);
+% 
+% x1 = p1(:,inliers);
+% x2 = p2(:,inliers);
+% x3 = p3(:,inliers);
 
 %% ToDo: compute a projective reconstruction using the factorization method
 
