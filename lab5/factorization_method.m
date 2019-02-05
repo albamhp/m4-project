@@ -36,10 +36,10 @@ function [Pproj, Xproj] = factorization_method(x, lambda_one)
         old_lambdas = lambdas;
         for ite=1:maxIter
             if mod(ite, 2) == 1
-                row_norms = 1./vecnorm(lambdas')';
+                row_norms = 1./sqrt(sum(lambdas.^2, 2));
                 lambdas = lambdas .* kron(row_norms, ones(1, n));
             else
-                column_norms = 1./vecnorm(lambdas);
+                column_norms = 1./sqrt(sum(lambdas.^2, 1));
                 lambdas = lambdas .* kron(column_norms, ones(m, 1));
             end
 
